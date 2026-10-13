@@ -1,13 +1,24 @@
 # Support
 
-## How to file issues and get help
+## Lab hosts
 
-This project uses GitHub Issues to track bugs and feature requests. Please search the existing
-issues before filing new issues to avoid duplicates. For new issues, file your bug or
-feature request as a new Issue.
+Raise issues with VectorSense through the support channel in your licence agreement. Include:
 
-For help and questions about using this project, please reach out to the content owners listed in the README.
+- the release version (`vs-hydrate --version`),
+- the command you ran and its exit code,
+- the report file from `out/` (`report-<command>-<timestamp>.json`).
 
-## Microsoft Support Policy
+Remove Temporary Access Passes from anything you attach.
 
-Support for this project is limited to the resources listed above.
+## Common questions
+
+| Question | Where to look |
+|---|---|
+| Setting up a tenant and running an event | [docs/operator-guide.md](docs/operator-guide.md) |
+| Exit codes and troubleshooting | [docs/operator-guide.md](docs/operator-guide.md), sections 5 and 9 |
+| Expected answers and proctoring | [instructions/instructor-notes.md](instructions/instructor-notes.md) |
+| Engine internals and Graph permissions | [docs/engine.md](docs/engine.md) |
+
+## Learners
+
+Learners ask their proctor or use **Help** in the lab. A learner with missing day-one data gets a fresh seat rather than a repaired one.

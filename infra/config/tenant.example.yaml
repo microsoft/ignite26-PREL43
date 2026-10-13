@@ -1,0 +1,59 @@
+# vs-hydrate configuration. Copy to tenant.yaml at the repository root and fill it in.
+# tenant.yaml is git-ignored. Relative paths resolve from the folder that holds it.
+
+tenant:
+  id: 00000000-0000-0000-0000-000000000000     # Directory (tenant) ID
+  domain: zava.example                          # Verified domain used for UPNs
+
+auth:
+  client_id: 00000000-0000-0000-0000-000000000000
+  certificate_path: /etc/vs-hydrate/vs-hydration.pem  # PEM with private key + certificate, from Skillable's key vault
+
+datapack:
+  path: data/release/helix-datapack-1.0.0.zip
+
+scoring:
+  scorecard: data/scoring/scorecard.json
+
+readiness:
+  check_set: data/readiness/check-set-1.0.0.json
+
+licences:
+  seat_skus: [SPE_E5, Microsoft_365_Copilot]    # SKU part numbers in the tenant (SPE_E3 also supported)
+  persona_sku: SPE_E3
+
+personas:
+  usage_location: US
+  sign_in_enabled: false                        # personas exist for content only; nobody signs in as them
+
+seats:
+  prefix: lab                                   # lab0001@zava.example, lab0002@...
+  group: VS-Lab-Seats                          # Cowork is enabled for this group (Skillable creates it)
+  time_zone: "India Standard Time"              # Windows name, set as the seat mailbox time zone
+  # time_zone_iana: Asia/Kolkata                # only needed for zones the engine does not know
+  locale: en-US
+  usage_location: US
+  given_name: Jordan                            # seat persona; mail and posts address the learner by this name
+  surname: Avery
+  reviewer: helix.reviewer@zava.example         # named lab user for Milestone 5 sharing
+  tap_lifetime_minutes: 480                     # must be allowed by the tenant's TAP policy
+  team_add_personas: false                      # personas join every seat's team only if true (1,000-team cap per user)
+  provisioning_timeout_minutes: 30
+
+# Anchor for every relative date. Set it to the event date. Seats must be
+# hydrated from D-1 09:30 (seat time zone) onward: Teams import cannot write
+# posts dated in the future. `auto` = the day the command runs.
+lab_day: auto
+
+output:
+  dir: out                                      # state, reports and seat inventory
+
+retire:
+  permanent_delete: false                       # true also purges seats from deleted users
+
+# Settings app-only Graph cannot see. Confirm each one, then set it to true.
+attestations:
+  cowork_enabled_for_group: false
+  credits_policy_linked: false
+  external_mail_to_sink: false
+  tap_policy_enabled: false

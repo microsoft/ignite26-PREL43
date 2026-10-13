@@ -1,0 +1,164 @@
+# Word documents in the Launch - Helix channel. Built into .docx by
+# src/tools/build_datapack.py. {{date:D+n}} placeholders are rendered by the engine
+# at hydration, so each placeholder must sit inside one paragraph or cell.
+#
+# The spec and plan disagree on purpose (fact F3):
+#   markets       spec 2.1 US, UK, Germany      plan 3 US, UK
+#   battery       spec 4.2 18 months            plan 5.1 24 months
+#   firmware      spec 5.3 version 2.1          plan 6 version 2.0
+#   certification spec 7 FCC + CE before ship   plan 4 CE on D+12, after ship
+# Risk owners: plan 8 names Nadia (supplier) and Omar (firmware) only.
+
+documents:
+
+  Helix-Product-Spec.docx:
+    author: Chloe Martin
+    title: Zava Helix Smart Sensor
+    subtitle: Product specification, version 3
+    blocks:
+      - {h: "Document control"}
+      - table:
+          - [Version, "3"]
+          - [Owner, "Chloe Martin, Product Manager, Helix"]
+          - [Published, "{{date:D-12}}"]
+          - [Status, Approved for launch planning]
+      - {h: "1 Overview"}
+      - {p: "Zava Helix is a battery-powered smart sensor for homes and small buildings. It measures temperature, humidity and occupancy and reports to the Zava app and to common building-management systems. Helix replaces the Gen2 sensor as Zava's lead product."}
+      - {h: "2 Markets"}
+      - {h2: "2.1 Launch markets"}
+      - {p: "Helix launches in the United States, the United Kingdom and Germany."}
+      - {h2: "2.2 Later markets"}
+      - {p: "France, the Netherlands and Australia follow in the second wave, subject to certification."}
+      - {h: "3 Hardware"}
+      - {bullets: ["Sensor module supplied by Corvane Components", "Two AA lithium cells", "Wall or surface mount, 58 x 58 x 21 mm", "Bluetooth Low Energy and Thread radios"]}
+      - {h: "4 Performance"}
+      - {h2: "4.1 Accuracy"}
+      - {p: "Temperature accuracy is plus or minus 0.2 degrees C. Relative humidity accuracy is plus or minus 2%."}
+      - {h2: "4.2 Battery life"}
+      - {p: "Battery life is 18 months at the default reporting interval of five minutes."}
+      - {h: "5 Software"}
+      - {h2: "5.1 Zava app"}
+      - {p: "Setup, alerts, history and sharing in the Zava app on iOS and Android."}
+      - {h2: "5.2 Integrations"}
+      - {p: "Matter over Thread, plus a REST API for building-management systems."}
+      - {h2: "5.3 Firmware"}
+      - {p: "Firmware version 2.1 is required at launch. Version 2.1 contains the pairing fix found in the setup study."}
+      - {h: "6 Packaging"}
+      - {p: "Retail box with sensor, two batteries, mounting kit and quick-start card."}
+      - {h: "7 Certification"}
+      - {p: "FCC and CE certification must be complete before Helix ships."}
+
+  Helix-Launch-Plan.docx:
+    author: Omar Haddad
+    title: Zava Helix Launch Plan
+    subtitle: Version 4
+    blocks:
+      - {h: "Document control"}
+      - table:
+          - [Version, "4"]
+          - [Owner, "Omar Haddad, Release Manager"]
+          - [Published, "{{date:D-11}}"]
+      - {h: "1 Purpose"}
+      - {p: "This plan sets out how Zava takes Helix to market: timeline, markets, messaging, release, channels and risks."}
+      - {h: "2 Launch summary"}
+      - table:
+          - [Item, Plan]
+          - [Ship date, "{{date:D+10}}"]
+          - [Launch volume, "12,000 units"]
+          - [Launch price, To be confirmed]
+          - [Sponsor, "Elena Marsh, CEO"]
+      - {h: "3 Markets"}
+      - {p: "Helix launches in the United States and the United Kingdom."}
+      - {h: "4 Timeline"}
+      - table:
+          - [Milestone, Date]
+          - [Creative final, "{{date:D-2}}"]
+          - [Readiness review, "{{date:D+2}}"]
+          - [Ship date, "{{date:D+10}}"]
+          - [Launch webinar, "{{date:D+10}}"]
+          - [CE certification expected, "{{date:D+12}}"]
+      - {h: "5 Messaging"}
+      - {h2: "5.1 Key claims"}
+      - {bullets: ["Set up in under three minutes", "Accurate to 0.2 degrees C", "24-month battery life"]}
+      - {h2: "5.2 Audiences"}
+      - {p: "Homeowners, small-building managers and installers."}
+      - {h: "6 Release"}
+      - {p: "Helix ships with firmware version 2.0. Updates are delivered over the air after launch."}
+      - {h: "7 Channels"}
+      - {p: "Zava online store, Harbor & Pine (UK retail) and installer partners."}
+      - {h: "8 Risks and owners"}
+      - table:
+          - [Risk, Owner, Mitigation]
+          - [Sensor module supply from Corvane, Nadia Kowalski, Weekly capacity check with the supplier]
+          - [Firmware readiness for launch, Omar Haddad, Release candidate frozen one week before ship]
+          - [Certification timing, "", Track with the certification lab]
+
+  Helix-Sync-Notes-1.docx:
+    author: Ethan Brooks
+    title: Helix sync 1
+    subtitle: "Meeting notes, {{date:D-14}}"
+    blocks:
+      - {h: "Attendees"}
+      - {p: "Ethan Brooks (chair), Chloe Martin, Omar Haddad, Nadia Kowalski, Rachel Adeyemi, Grace Liu, {{learner}}"}
+      - {h: "Decisions"}
+      - {bullets: ["Ship date agreed for {{date:D+10}}.", "Launch volume of 12,000 units."]}
+      - {h: "Owners"}
+      - table:
+          - [Area, Owner]
+          - [Product spec, Chloe Martin]
+          - [Launch plan and firmware, Omar Haddad]
+          - [Supply and Corvane relationship, Nadia Kowalski]
+          - [Pricing model, Rachel Adeyemi]
+      - {h: "Actions"}
+      - {bullets: ["Chloe to publish spec v3.", "Omar to publish launch plan v4.", "Rachel to model two price points.", "Nadia to confirm module volumes with Corvane."]}
+
+  Helix-Sync-Notes-2.docx:
+    author: Chloe Martin
+    title: Helix sync 2
+    subtitle: "Meeting notes, {{date:D-5}}"
+    blocks:
+      - {h: "Attendees"}
+      - {p: "Chloe Martin (chair), Omar Haddad, Nadia Kowalski, Rachel Adeyemi, Grace Liu, Ethan Brooks"}
+      - {h: "Supplier"}
+      - {p: "Corvane can ship 60% of the sensor modules on schedule and 40% eight days late. Options discussed: accept the split shipment, or fill the gap with Gen2 sensors. Chloe noted that Gen2 does not meet the Helix accuracy target. No decision."}
+      - {h: "Price"}
+      - {p: "249 and 279 discussed again with the margin figures from the pricing model. No decision; carried over."}
+      - {h: "Certification"}
+      - {p: "CE timing may fall after the ship date. To be confirmed with the certification lab."}
+      - {h: "Handover"}
+      - {p: "Ethan has moved to the Gen2 refresh programme. {{learner}} takes over as Helix launch lead."}
+      - {h: "Actions"}
+      - {bullets: ["Nadia to keep the supplier informed.", "Omar to confirm the firmware build for launch."]}
+
+# Competitor one-pagers (PDF). Static: no placeholders.
+# F5: SensorCloud accuracy equals Helix's, so "2x more accurate" is unsupported.
+competitors:
+  Competitor-1-SensorCloud.pdf:
+    product: SensorCloud Pro
+    company: SensorCloud
+    price: 259
+    accuracy: "plus or minus 0.2 degrees C"
+    battery: 12 months
+    notes: ["Wi-Fi only", "Subscription required for history beyond 30 days", "Strong installer channel in the US"]
+  Competitor-2-EdgeSense.pdf:
+    product: EdgeSense One
+    company: EdgeSense
+    price: 229
+    accuracy: "plus or minus 0.3 degrees C"
+    battery: 18 months
+    notes: ["Thread and Zigbee", "No occupancy sensing", "Aggressive retail pricing in the UK"]
+  Competitor-3-Gen3.pdf:
+    product: Gen3 Home
+    company: Gen3
+    price: 199
+    accuracy: "plus or minus 0.5 degrees C"
+    battery: 12 months
+    notes: ["Entry-level positioning", "Bluetooth only", "Sold mainly through big-box retail"]
+
+# Pricing workbook (F2 and the numbers learners trace).
+pricing:
+  file: Helix-Pricing.xlsx
+  author: Rachel Adeyemi
+  unit_cost: 142
+  volume: 12000
+  scenarios: [{name: Scenario A, price: 249}, {name: Scenario B, price: 279}]

@@ -1,0 +1,66 @@
+# Personas. 32 internal accounts (created once per tenant by `tenant`),
+# 4 external contacts (mail addresses only) and the shared reviewer account.
+# `key` is how every other file in the data pack refers to a person.
+# UPN = <mail>@<tenant domain>. External addresses use reserved .example domains.
+
+internal:
+  # Leadership
+  - {key: elena,   given: Elena,   surname: Marsh,     mail: elena.marsh,     title: Chief Executive Officer,      department: Leadership,    manager: null,   office: Denver HQ,  about: "Sponsor of the Helix launch.", skills: [Strategy, Product launches]}
+  - {key: david,   given: David,   surname: Okafor,    mail: david.okafor,    title: Chief Financial Officer,      department: Leadership,    manager: elena,  office: Denver HQ,  about: "Owns finance, procurement and pricing approval.", skills: [Finance, Pricing approval]}
+  - {key: priya,   given: Priya,   surname: Raman,     mail: priya.raman,     title: Chief Operating Officer,      department: Leadership,    manager: elena,  office: Denver HQ,  about: "Owns operations, supply and quality.", skills: [Operations, Supply chain]}
+  # Marketing
+  - {key: grace,   given: Grace,   surname: Liu,       mail: grace.liu,       title: VP Marketing,                 department: Marketing,     manager: elena,  office: Denver HQ,  about: "Leads marketing and the product launch programme.", skills: [Launch marketing, Messaging]}
+  - {key: tomas,   given: Tomás,   surname: Rivera,    mail: tomas.rivera,    title: Brand Lead,                   department: Marketing,     manager: grace,  office: Denver HQ,  about: "Brand and launch messaging.", skills: [Brand, Messaging]}
+  - {key: aisha,   given: Aisha,   surname: Bello,     mail: aisha.bello,     title: Content Strategist,           department: Marketing,     manager: grace,  office: Dublin,     about: "Web, blog and launch content.", skills: [Content, Copywriting]}
+  - {key: liam,    given: Liam,    surname: O'Connor,  mail: liam.oconnor,    title: Events Coordinator,           department: Marketing,     manager: grace,  office: Dublin,     about: "Launch events and webinars.", skills: [Events]}
+  - {key: mei,     given: Mei,     surname: Tanaka,    mail: mei.tanaka,      title: Competitive Analyst,          department: Marketing,     manager: grace,  office: Singapore,  about: "Competitor research and battlecards.", skills: [Competitive intelligence]}
+  - {key: rohan,   given: Rohan,   surname: Das,       mail: rohan.das,       title: Social Media Specialist,      department: Marketing,     manager: grace,  office: Bengaluru,  about: "Social channels and launch posts.", skills: [Social media]}
+  # Sales
+  - {key: marcus,  given: Marcus,  surname: Hale,      mail: marcus.hale,     title: Sales Director,               department: Sales,         manager: elena,  office: Denver HQ,  about: "Leads the sales team and the launch sales deck.", skills: [Enterprise sales]}
+  - {key: sofia,   given: Sofia,   surname: Petrova,   mail: sofia.petrova,   title: Account Executive,            department: Sales,         manager: marcus, office: Dublin,     about: "EMEA retail accounts.", skills: [Retail accounts]}
+  - {key: daniel,  given: Daniel,  surname: Kim,       mail: daniel.kim,      title: Account Executive,            department: Sales,         manager: marcus, office: Denver HQ,  about: "North America commercial accounts.", skills: [Commercial accounts]}
+  - {key: fatima,  given: Fatima,  surname: Al-Sayed,  mail: fatima.alsayed,  title: Account Executive,            department: Sales,         manager: marcus, office: Singapore,  about: "APAC partner accounts.", skills: [Partner sales]}
+  - {key: noah,    given: Noah,    surname: Becker,    mail: noah.becker,     title: Sales Operations,             department: Sales,         manager: marcus, office: Denver HQ,  about: "CRM, quotes and price books.", skills: [Sales operations]}
+  - {key: hannah,  given: Hannah,  surname: Schmidt,   mail: hannah.schmidt,  title: Customer Success Lead,        department: Sales,         manager: marcus, office: Dublin,     about: "Customer onboarding and the launch FAQ.", skills: [Customer success]}
+  # Product
+  - {key: arjun,   given: Arjun,   surname: Mehta,     mail: arjun.mehta,     title: Head of Product,              department: Product,       manager: elena,  office: Denver HQ,  about: "Owns the product portfolio.", skills: [Product strategy]}
+  - {key: chloe,   given: Chloe,   surname: Martin,    mail: chloe.martin,    title: "Product Manager, Helix",     department: Product,       manager: arjun,  office: Denver HQ,  about: "Owns the Helix product spec.", skills: [Product management, Sensors]}
+  - {key: ethan,   given: Ethan,   surname: Brooks,    mail: ethan.brooks,    title: Programme Manager,            department: Product,       manager: arjun,  office: Denver HQ,  about: "Former Helix launch lead, now on the Gen2 refresh programme.", skills: [Programme management]}
+  - {key: yuki,    given: Yuki,    surname: Sato,      mail: yuki.sato,       title: UX Researcher,                department: Product,       manager: arjun,  office: Singapore,  about: "Customer research for Helix setup.", skills: [UX research]}
+  - {key: omar,    given: Omar,    surname: Haddad,    mail: omar.haddad,     title: Release Manager,              department: Product,       manager: arjun,  office: Bengaluru,  about: "Owns the Helix launch plan and firmware release.", skills: [Release management, Firmware]}
+  # Finance
+  - {key: rachel,  given: Rachel,  surname: Adeyemi,   mail: rachel.adeyemi,  title: Finance Controller,           department: Finance,       manager: david,  office: Denver HQ,  about: "Owns the Helix pricing model.", skills: [Financial control, Pricing]}
+  - {key: victor,  given: Victor,  surname: Lindqvist, mail: victor.lindqvist,title: FP&A Analyst,                 department: Finance,       manager: rachel, office: Dublin,     about: "Forecasting and planning.", skills: [FP&A]}
+  - {key: nadia,   given: Nadia,   surname: Kowalski,  mail: nadia.kowalski,  title: Procurement Lead,             department: Finance,       manager: david,  office: Denver HQ,  about: "Owns supplier relationships for Helix components.", skills: [Supplier contracts, Component sourcing]}
+  - {key: samuel,  given: Samuel,  surname: Ortiz,     mail: samuel.ortiz,    title: Accounts Payable,             department: Finance,       manager: rachel, office: Denver HQ,  about: "Supplier invoices and payments.", skills: [Accounts payable]}
+  # Operations
+  - {key: karen,   given: Karen,   surname: Whitfield, mail: karen.whitfield, title: Operations Manager,           department: Operations,    manager: priya,  office: Denver HQ,  about: "Manufacturing and fulfilment operations.", skills: [Operations]}
+  - {key: ravi,    given: Ravi,    surname: Shankar,   mail: ravi.shankar,    title: Supply Planner,               department: Operations,    manager: karen,  office: Bengaluru,  about: "Supply and demand planning for Helix.", skills: [Supply planning]}
+  - {key: lucia,   given: Lucía,   surname: Fernández, mail: lucia.fernandez, title: Logistics Coordinator,        department: Operations,    manager: karen,  office: Dublin,     about: "Inbound and outbound logistics.", skills: [Logistics]}
+  - {key: ben,     given: Ben,     surname: Carter,    mail: ben.carter,      title: Quality and Certification,    department: Operations,    manager: karen,  office: Denver HQ,  about: "Product quality and FCC/CE certification.", skills: [Certification, Quality]}
+  # People and IT
+  - {key: olivia,  given: Olivia,  surname: Bennett,   mail: olivia.bennett,  title: HR Business Partner,          department: People and IT, manager: priya,  office: Denver HQ,  about: "HR partner for Product and Marketing.", skills: [HR]}
+  - {key: jamal,   given: Jamal,   surname: Wright,    mail: jamal.wright,    title: Talent Partner,               department: People and IT, manager: olivia, office: Denver HQ,  about: "Recruiting.", skills: [Recruiting]}
+  - {key: ingrid,  given: Ingrid,  surname: Novak,     mail: ingrid.novak,    title: IT Service Lead,              department: People and IT, manager: priya,  office: Dublin,     about: "IT services and Microsoft 365.", skills: [IT services]}
+  - {key: kenji,   given: Kenji,   surname: Watanabe,  mail: kenji.watanabe,  title: Security Analyst,             department: People and IT, manager: ingrid, office: Singapore,  about: "Security operations.", skills: [Security]}
+
+external:
+  - {key: felix, given: Felix, surname: Grant,    email: felix.grant@corvane.example,     title: Account Manager,  company: Corvane Components}
+  - {key: zoe,   given: Zoe,   surname: Hartmann, email: zoe.hartmann@orvana.example,     title: Account Director, company: Orvana Creative}
+  - {key: maya,  given: Maya,  surname: Iyer,     email: maya.iyer@aldermont.example,     title: Analyst,          company: Aldermont Insights}
+  - {key: paul,  given: Paul,  surname: Desmond,  email: paul.desmond@harborpine.example, title: Buyer,            company: Harbor & Pine}
+
+# The learner seat. Every seat is created with this persona; `{{learner}}` in
+# any content renders to the seat's display name. Operators may rename a seat
+# to the learner's name after launch; seeded content keeps the original name.
+seat:
+  title: Helix Launch Lead
+  department: Marketing
+  manager: grace
+  office: Denver HQ
+
+reviewer:
+  given: Helix
+  surname: Reviewer
+  title: Lab Reviewer
+  department: Marketing

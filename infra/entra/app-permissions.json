@@ -1,0 +1,22 @@
+{
+  "displayName": "VectorSense Hydration Kit",
+  "credential": "certificate",
+  "graphApplicationPermissions": [
+    "User.ReadWrite.All",
+    "Group.ReadWrite.All",
+    "Organization.Read.All",
+    "UserAuthenticationMethod.ReadWrite.All",
+    "MailboxSettings.ReadWrite",
+    "Mail.ReadWrite",
+    "Calendars.ReadWrite",
+    "Teamwork.Migrate.All",
+    "TeamMember.ReadWrite.All",
+    "ChannelMessage.Read.All",
+    "Files.ReadWrite.All",
+    "Sites.ReadWrite.All"
+  ],
+  "directoryRoles": [
+    "User Administrator",
+    "License Administrator"
+  ]
+}

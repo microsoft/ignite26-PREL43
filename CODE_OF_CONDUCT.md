@@ -1,10 +1,7 @@
-# Microsoft Open Source Code of Conduct
+# Code of conduct
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+Everyone working on this repository, including contributors from partner organisations, is expected to be respectful, constructive and professional in issues, pull requests, reviews and any other project communication.
 
-Resources:
+Unacceptable behaviour includes harassment, personal attacks, discriminatory language, and publishing others' private information without permission.
 
-- [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/)
-- [Microsoft Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/)
-- Contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with questions or concerns
-- Employees can reach out at [aka.ms/opensource/moderation-support](https://aka.ms/opensource/moderation-support)
+Report concerns to the VectorSense project maintainers through the contact named in your engagement. Reports are handled confidentially, and maintainers may remove comments or contributors that break this code.

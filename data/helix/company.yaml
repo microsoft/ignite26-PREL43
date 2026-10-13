@@ -1,0 +1,26 @@
+# Zava Corporation: company profile used across the Helix data pack.
+# Zava is Microsoft's fictional company. Everything here is fictional.
+id: zava
+name: Zava Corporation
+industry: Smart building and home sensors
+headquarters: Denver, United States
+offices: [Denver, Dublin, Bengaluru, Singapore]
+employees: about 1,800
+current_product: Zava Gen2 sensor
+launching:
+  product: Zava Helix smart sensor
+  ship_offset: D+10
+external_organisations:
+  - name: Corvane Components
+    role: Sensor module supplier
+    domain: corvane.example
+  - name: Orvana Creative
+    role: Launch creative agency
+    domain: orvana.example
+  - name: Aldermont Insights
+    role: Industry analyst firm
+    domain: aldermont.example
+  - name: Harbor & Pine
+    role: Retail customer
+    domain: harborpine.example
+competitors: [SensorCloud, EdgeSense, Gen3]

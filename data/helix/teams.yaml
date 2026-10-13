@@ -1,0 +1,117 @@
+# Per-seat team and the Launch - Helix channel.
+# Imported in migration mode so posts keep their original times and authors.
+# Times are offsets from D0; all must be earlier than D-1 09:00.
+# `mentions: [learner]` renders an @mention of the seat at {{mention:learner}}.
+
+team:
+  display_name: Zava Product Launches
+  description: Launch programmes for Zava products
+  created: "D-15 09:00"
+  channels:
+    - name: Launch - Helix
+      description: Everything for the Helix launch
+      created: "D-15 09:05"
+      files_folder:
+        shared: [Helix-Product-Spec.docx, Helix-Launch-Plan.docx, Helix-Pricing.xlsx,
+                 Competitor-1-SensorCloud.pdf, Competitor-2-EdgeSense.pdf, Competitor-3-Gen3.pdf]
+        Recordings: [Helix-Sync-Notes-1.docx, Helix-Sync-Notes-2.docx]
+
+# 13 top-level posts and 7 replies: 20 messages in the channel.
+posts:
+  - id: p-01
+    from: ethan
+    sent: "D-14 16:00"
+    body: |
+      Sync 1 done. Owners: Chloe on the product spec, Omar on the launch plan and firmware, Nadia on supply, Rachel on the pricing model. Ship date agreed for {{date:D+10}}. Notes are in Shared > Recordings (Helix-Sync-Notes-1).
+
+  - id: p-02
+    from: grace
+    sent: "D-13 09:40"
+    body: |
+      Welcome to the Helix launch channel. Please keep launch decisions and files here so we have one place to look.
+
+  - id: p-03
+    from: chloe
+    sent: "D-12 11:00"
+    fact: F3
+    body: |
+      Helix-Product-Spec.docx v3 is up in Shared. Main changes from v2: launch markets, battery life and the firmware baseline.
+
+  - id: p-04
+    from: omar
+    sent: "D-11 15:20"
+    fact: F3
+    body: |
+      Helix-Launch-Plan.docx v4 is up in Shared: timeline, messaging, release plan, and risks with owners.
+
+  - id: p-05
+    from: aisha
+    sent: "D-10 10:05"
+    body: |
+      Launch blog outline is ready for comments. It follows the messaging pillars in the plan (setup in minutes, accuracy, long battery life).
+
+  - id: p-06
+    from: tomas
+    sent: "D-8 13:30"
+    fact: F2
+    body: |
+      Price for launch: 249 or 279? Sales needs it for the deck.
+    replies:
+      - {from: rachel, sent: "D-8 13:52", body: "279 keeps gross margin near 49%. 249 drops it to about 43%. Both scenarios are in Helix-Pricing.xlsx."}
+      - {from: mei,    sent: "D-8 14:10", body: "SensorCloud is at 259 and EdgeSense at 229. 279 looks steep."}
+      - {from: chloe,  sent: "D-8 14:25", body: "Let's settle it at the next sync."}
+      - {from: grace,  sent: "D-8 14:40", body: "Agreed, next sync."}
+
+  - id: p-08
+    from: ethan
+    sent: "D-7 17:00"
+    mentions: [learner]
+    body: |
+      News: I'm moving to the Gen2 refresh programme. {{mention:learner}} takes over as Helix launch lead. I've handed over the supplier thread and the open items.
+
+  - id: p-09
+    from: liam
+    sent: "D-6 12:00"
+    body: |
+      Launch webinar is booked for {{date:D+10}}, 16:00. Registration page goes live next week.
+
+  - id: p-10
+    from: nadia
+    sent: "D-5 16:10"
+    fact: F2
+    mentions: [learner]
+    body: |
+      {{mention:learner}} Corvane can only ship 60% of the modules on time. Do we launch with the Gen2 sensor as fallback for the rest?
+    replies:
+      - {from: chloe, sent: "D-5 16:30", body: "Gen2 misses the spec's accuracy target. I'd rather not."}
+      - {from: ravi,  sent: "D-5 16:45", body: "For reference, we hold about 5,000 Gen2 modules."}
+      - {from: omar,  sent: "D-5 17:05", body: "Then we need a call before the supplier deadline. Who owns it?"}
+
+  - id: p-12
+    from: mei
+    sent: "D-4 11:15"
+    fact: F5
+    body: |
+      Three competitor PDFs added to Shared: SensorCloud Pro, EdgeSense One and Gen3 Home. Price, accuracy and battery for each.
+
+  - id: p-14
+    from: rohan
+    sent: "D-3 14:45"
+    fact: F5
+    body: |
+      Draft launch post for social: "Helix is 2x more accurate than SensorCloud." Good to go?
+
+  - id: p-16
+    from: ben
+    sent: "D-2 10:30"
+    fact: F3
+    body: |
+      Certification update: FCC is complete. CE certification is now expected on {{date:D+12}}, two days after the planned ship date.
+
+  - id: p-18
+    from: grace
+    sent: "D-1 08:30"
+    fact: F6
+    mentions: [learner]
+    body: |
+      {{mention:learner}} Elena wants a clear answer on the ship date before the readiness review on {{weekday:D+2}}.

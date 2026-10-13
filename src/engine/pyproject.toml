@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vs-hydrate"
+dynamic = ["version"]
+description = "VectorSense Hydration Kit engine: hydrates, checks and scores Copilot Cowork lab seats"
+requires-python = ">=3.11"
+license = { text = "Proprietary. Licensed to Skillable under agreement with VectorSense." }
+dependencies = [
+  "msal>=1.28",
+  "requests>=2.31",
+  "PyYAML>=6.0",
+  "cryptography>=42",
+  "pypdf>=4.0",
+  "tzdata>=2024.1",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8", "openpyxl>=3.1"]
+
+[project.scripts]
+vs-hydrate = "vs_hydrate.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "vs_hydrate.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["vs_hydrate*"]

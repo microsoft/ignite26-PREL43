@@ -1,10 +1,10 @@
-# Docs
+# docs
 
-<!-- IGNITE TEMPLATE PLACEHOLDER: remove this folder when the session needs no additional documentation. -->
+| Document | Audience | What it covers |
+|---|---|---|
+| [operator-guide.md](operator-guide.md) | Lab host operations | Prerequisites, configuration, the six commands, running an event, lab launch and Submit integration, troubleshooting |
+| [engine.md](engine.md) | Engineers | Engine layout, how each workload is written, Graph permissions, platform limits, development |
+| [data-pack.md](data-pack.md) | Content authors | Source file fields, build rules, seeded facts |
+| [release-notes.md](release-notes.md) | Everyone | What each tagged release contains and any required actions |
 
-Use this folder for supporting documentation such as reference material and
-architecture/context.
-
-If this repository intentionally uses MkDocs or another docs-site pattern,
-attendee instructions can remain here. Link the attendee entry point clearly
-from the root README.
+Learner and proctor material is in [../instructions/](../instructions/).

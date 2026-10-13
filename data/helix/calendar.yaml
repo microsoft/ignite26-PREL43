@@ -1,0 +1,77 @@
+# Seat calendar. Each event is created in the organiser's calendar with the
+# seat as a required attendee, then accepted on the seat's behalf.
+#
+# Rules the readiness check enforces:
+# - exactly 4 events between D0 00:00 and D+5 23:59, two of them overlapping;
+# - D+1 10:00-10:30, 14:00-14:30 and 16:00-16:30 stay free (M1 focus blocks);
+# - no recurring series.
+
+events:
+  # ---------------------------------------------------------------- past
+  - id: ev-001
+    subject: Helix sync
+    organiser: ethan
+    attendees: [learner, chloe, omar, nadia, rachel, grace]
+    start: "D-14 10:00"
+    end: "D-14 11:00"
+    body: Weekly Helix launch sync. Owners, ship date and actions.
+
+  - id: ev-002
+    subject: Helix creative review
+    organiser: tomas
+    attendees: [learner, aisha, rohan, zoe]
+    start: "D-9 14:00"
+    end: "D-9 15:00"
+    body: First-round creative from Orvana.
+
+  - id: ev-003
+    subject: Helix sync
+    organiser: chloe
+    attendees: [learner, omar, nadia, rachel, grace, ethan]
+    start: "D-5 15:00"
+    end: "D-5 16:00"
+    body: Weekly Helix launch sync. Supplier, fallback and price.
+
+  - id: ev-004
+    subject: Marketing all-hands
+    organiser: grace
+    attendees: [learner, tomas, aisha, liam, mei, rohan]
+    start: "D-3 11:00"
+    end: "D-3 12:00"
+    body: Monthly marketing all-hands.
+
+  # ---------------------------------------------------------------- next five days (exactly 4)
+  - id: ev-101
+    subject: Helix supplier call
+    organiser: nadia
+    attendees: [learner, chloe, felix]
+    start: "D+1 11:00"
+    end: "D+1 12:00"
+    fact: F4
+    body: Corvane capacity, the split shipment and the order deadline.
+
+  - id: ev-102
+    subject: Helix price decision
+    organiser: grace
+    attendees: [learner, rachel, marcus, chloe]
+    start: "D+1 11:30"
+    end: "D+1 12:30"
+    fact: F4
+    body: Decide the Helix list price for launch. Scenarios are in Helix-Pricing.xlsx.
+
+  - id: ev-103
+    subject: Helix readiness review
+    organiser: elena
+    attendees: [learner, grace, chloe, omar, nadia]
+    start: "D+2 15:00"
+    end: "D+2 16:00"
+    fact: F6
+    body: Go or no-go review for the Helix launch.
+
+  - id: ev-104
+    subject: Helix marketing sync
+    organiser: tomas
+    attendees: [learner, mei, rohan]
+    start: "D+3 09:30"
+    end: "D+3 10:00"
+    body: Launch messaging, social plan and creative sign-off.

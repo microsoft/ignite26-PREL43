@@ -1,0 +1,527 @@
+# Seat mailbox content. Written into each seat's Inbox at hydration.
+#
+# Times are offsets from the lab day (D0) in the seat's time zone: "D-9 09:12".
+# Nothing may be later than D-1 09:00, because hydration runs from D-1 09:30.
+# People are persona keys from people.yaml; `learner` is the seat.
+# Body text supports {{learner}}, {{learner_first}}, {{date:D+2}}, {{weekday:D+2}}.
+# A blank line separates paragraphs.
+#
+# Seeded facts: F1 supplier, F2 open decisions, F6 executive question,
+# W1/W2 people waiting. See readiness/check-set for the expected answers.
+
+messages:
+
+  # ---------------------------------------------------------------- supplier thread (exactly 6, one conversation)
+  - id: s-1
+    conversation: supplier
+    from: felix
+    to: [nadia]
+    cc: [learner, chloe, ethan]
+    subject: "Helix sensor modules: capacity risk"
+    sent: "D-9 09:12"
+    read: true
+    fact: F1
+    body: |
+      Hi Nadia,
+
+      A heads-up on the Helix sensor modules. One of our two fab lines for the module is down for unplanned maintenance, and I can't yet promise the full 12,000 modules on the original delivery date.
+
+      I'll come back with firm volumes as soon as the line is assessed.
+
+      Regards,
+      Felix Grant
+      Account Manager, Corvane Components
+
+  - id: s-2
+    conversation: supplier
+    from: nadia
+    to: [felix]
+    cc: [learner, chloe, ethan]
+    subject: "RE: Helix sensor modules: capacity risk"
+    sent: "D-8 11:03"
+    read: true
+    fact: F1
+    body: |
+      Hi Felix,
+
+      Thanks for the early warning. What volume can you commit to on the original date, and when would the rest follow? We need numbers to plan around, not a range.
+
+      Nadia
+
+  - id: s-3
+    conversation: supplier
+    from: felix
+    to: [nadia]
+    cc: [learner, chloe, ethan]
+    subject: "RE: Helix sensor modules: capacity risk"
+    sent: "D-7 16:40"
+    read: true
+    fact: F1
+    body: |
+      Nadia,
+
+      Firm numbers: we can ship 60% of the Helix sensor modules on schedule. The remaining 40% will be eight days late.
+
+      Let me know how you want to handle the split.
+
+      Felix
+
+  - id: s-4
+    conversation: supplier
+    from: ethan
+    to: [nadia, felix]
+    cc: [learner, chloe]
+    subject: "RE: Helix sensor modules: capacity risk"
+    sent: "D-5 14:05"
+    read: true
+    body: |
+      Nadia, Felix,
+
+      I've moved over to the Gen2 refresh programme, so {{learner}} is taking over the Helix launch. Please keep {{learner_first}} on this thread from here on.
+
+      Ethan
+
+  - id: s-5
+    conversation: supplier
+    from: nadia
+    to: [learner]
+    cc: [chloe, omar]
+    subject: "RE: Helix sensor modules: capacity risk"
+    sent: "D-3 10:20"
+    read: false
+    fact: F2
+    body: |
+      Hi {{learner_first}},
+
+      We need a call on this. Either we accept the split shipment (60% on time, 40% eight days late) or we fill the gap with the Gen2 sensor as a fallback. Procurement can execute either, but it isn't my decision to make.
+
+      Can you tell me which way we're going?
+
+      Nadia
+
+  - id: s-6
+    conversation: supplier
+    from: felix
+    to: [nadia, learner]
+    subject: "RE: Helix sensor modules: capacity risk"
+    sent: "D-1 07:40"
+    read: false
+    importance: high
+    fact: F1
+    body: |
+      Hi both,
+
+      We can ship 60% of the Helix sensor modules on the original date and the remaining 40% eight days later.
+
+      Please confirm by end of day on {{date:D+2}} whether to split the shipment or hold the full order. If we don't hear back, we hold the full order.
+
+      Felix
+
+  # ---------------------------------------------------------------- people waiting, executive, handover
+  - id: m-21
+    from: hannah
+    to: [learner]
+    subject: "Helix customer FAQ: need your input"
+    sent: "D-6 10:30"
+    read: true
+    fact: W1
+    body: |
+      Hi {{learner_first}},
+
+      Customer Success needs to publish the Helix customer FAQ before launch. I've drafted answers on setup, the app and returns, but I can't finish the battery life and availability questions without you.
+
+      Could you send me the approved wording this week?
+
+      Thanks,
+      Hannah
+
+  - id: m-24
+    from: marcus
+    to: [learner]
+    subject: "Helix pricing for the sales deck?"
+    sent: "D-4 10:12"
+    read: true
+    fact: W2
+    body: |
+      Hi {{learner_first}},
+
+      Ethan said you're picking up Helix. My team finalises the launch sales deck this week and we still don't know whether we're quoting 249 or 279.
+
+      Can you confirm the list price, or tell me who can?
+
+      Thanks,
+      Marcus
+
+  - id: m-30
+    from: elena
+    to: [learner]
+    cc: [grace]
+    subject: "Does the Helix date hold?"
+    sent: "D-1 08:15"
+    read: false
+    flag: true
+    fact: F6
+    body: |
+      {{learner_first}},
+
+      I keep hearing different things about Helix. Before the readiness review on {{weekday:D+2}} I need a straight answer: does the ship date hold?
+
+      If not, tell me what it depends on and what you need from me. Evidence, please, not opinions.
+
+      Elena
+
+  - id: m-31
+    from: grace
+    to: [learner]
+    subject: "Helix is yours from tomorrow"
+    sent: "D-1 08:45"
+    read: false
+    body: |
+      Hi {{learner_first}},
+
+      As discussed, you take over as Helix launch lead from tomorrow. Ethan's notes are in the Launch - Helix channel, and the two sync notes are in the Recordings folder.
+
+      Elena will want a view on the ship date before the readiness review. Shout if you need anything from me.
+
+      Grace
+
+  # ---------------------------------------------------------------- Helix-adjacent routine mail
+  - id: m-01
+    from: ethan
+    to: [learner]
+    subject: "Helix launch: welcome to the squad"
+    sent: "D-14 17:30"
+    read: true
+    body: |
+      Hi {{learner_first}},
+
+      I've added you to the Launch - Helix channel so you can follow along. The spec and plan will land there this week. Today's sync notes are in the Recordings folder.
+
+      Ethan
+
+  - id: m-02
+    from: zoe
+    to: [tomas]
+    cc: [learner]
+    subject: "Helix launch creative: first round"
+    sent: "D-13 15:10"
+    read: true
+    body: |
+      Hi Tomás,
+
+      First-round creative for Helix is ready for review: hero image, three social tiles and the launch video storyboard. We've built the copy around the messaging pillars from your brief.
+
+      Feedback by Friday keeps us on schedule.
+
+      Zoe Hartmann
+      Orvana Creative
+
+  - id: m-03
+    from: aisha
+    to: [learner, tomas]
+    subject: "Helix launch blog: outline attached in channel"
+    sent: "D-10 10:20"
+    read: true
+    body: |
+      Hi both,
+
+      I've posted the Helix launch blog outline in the channel. It follows the messaging pillars in the launch plan. I'll hold the battery life line until product confirms it.
+
+      Aisha
+
+  - id: m-04
+    from: maya
+    to: [grace]
+    cc: [learner]
+    subject: "Briefing request: Zava Helix"
+    sent: "D-9 13:45"
+    read: true
+    body: |
+      Hi Grace,
+
+      Aldermont is publishing a smart-sensor market note next month. Could we schedule a 30-minute analyst briefing on Helix after launch?
+
+      Best,
+      Maya Iyer
+      Aldermont Insights
+
+  - id: m-05
+    from: paul
+    to: [sofia]
+    cc: [learner]
+    subject: "Harbor & Pine: Helix launch stock"
+    sent: "D-8 09:05"
+    read: true
+    body: |
+      Hi Sofia,
+
+      We'd like Helix on shelf in our UK stores for launch week. Please confirm launch-day availability and the list price so we can finalise the planogram.
+
+      Paul Desmond
+      Buyer, Harbor & Pine
+
+  - id: m-06
+    from: liam
+    to: [learner]
+    subject: "Helix launch webinar: speaker slot"
+    sent: "D-6 15:40"
+    read: true
+    body: |
+      Hi {{learner_first}},
+
+      The Helix launch webinar is booked for launch day. Would you like the opening speaker slot, or should I ask Grace?
+
+      Liam
+
+  - id: m-07
+    from: yuki
+    to: [chloe]
+    cc: [learner]
+    subject: "Helix setup study: summary"
+    sent: "D-6 11:15"
+    read: true
+    body: |
+      Hi Chloe,
+
+      Summary of the Helix setup study: 11 of 12 participants paired the sensor in under three minutes. The one failure was a firmware prompt that confused the participant. Full notes to follow.
+
+      Yuki
+
+  - id: m-08
+    from: ravi
+    to: [nadia]
+    cc: [learner]
+    subject: "Helix supply plan: week 1 allocation"
+    sent: "D-5 09:50"
+    read: true
+    body: |
+      Nadia,
+
+      Draft week-one allocation is US 6,500 units, UK 3,500 and the rest held for direct orders, based on the plan's 12,000 launch units. I'll rework it once the module volumes are known.
+
+      Ravi
+
+  - id: m-09
+    from: noah
+    to: [marcus]
+    cc: [learner]
+    subject: "Price book update for Helix"
+    sent: "D-4 16:30"
+    read: true
+    body: |
+      Marcus,
+
+      The Helix SKU is set up in the CRM. The list price field is still empty until we have a decision. Quotes can't be generated until it's filled in.
+
+      Noah
+
+  - id: m-10
+    from: tomas
+    to: [learner]
+    subject: "Helix messaging: battery line"
+    sent: "D-3 12:10"
+    read: true
+    body: |
+      Hi {{learner_first}},
+
+      The creative uses "24-month battery life" from the launch plan. Can you confirm that's the number we're going with? I've heard the spec says something different.
+
+      Tomás
+
+  - id: m-11
+    from: lucia
+    to: [ravi]
+    cc: [learner]
+    subject: "Helix inbound freight booking"
+    sent: "D-2 14:00"
+    read: false
+    body: |
+      Ravi,
+
+      Freight is booked for the first module delivery. If the shipment is split, I'll need to book a second slot, so let me know as soon as that's decided.
+
+      Lucía
+
+  - id: m-12
+    from: samuel
+    to: [nadia]
+    cc: [learner]
+    subject: "Corvane invoice: Helix module deposit"
+    sent: "D-2 10:05"
+    read: false
+    body: |
+      Hi Nadia,
+
+      Corvane's deposit invoice for the Helix modules is in the queue. Do we pay it in full or wait until volumes are confirmed?
+
+      Samuel
+
+  # ---------------------------------------------------------------- general company mail
+  - id: m-40
+    from: ingrid
+    to: [learner]
+    subject: "IT: planned maintenance this weekend"
+    sent: "D-12 08:00"
+    read: true
+    body: |
+      Hello,
+
+      The VPN gateway will be offline for maintenance on Saturday between 06:00 and 08:00 Denver time. Microsoft 365 is not affected.
+
+      IT Service Desk
+
+  - id: m-41
+    from: olivia
+    to: [learner]
+    subject: "Reminder: quarterly check-ins"
+    sent: "D-11 09:30"
+    read: true
+    body: |
+      Hi {{learner_first}},
+
+      A reminder that quarterly check-ins with your manager are due by the end of the month. The template is on the HR site.
+
+      Olivia
+
+  - id: m-42
+    from: grace
+    to: [learner]
+    subject: "Marketing weekly: launches, events, wins"
+    sent: "D-10 17:00"
+    read: true
+    body: |
+      Team,
+
+      This week: Helix creative round one is in, the launch webinar is booked, and social reached a record month for the Gen2 refresh. Thanks all.
+
+      Grace
+
+  - id: m-43
+    from: kenji
+    to: [learner]
+    subject: "Security awareness: phishing simulation results"
+    sent: "D-9 11:00"
+    read: true
+    body: |
+      Hello,
+
+      Last month's phishing simulation: 94% of staff reported the test message. Thank you. Remember to use the Report button in Outlook.
+
+      Security Operations
+
+  - id: m-44
+    from: jamal
+    to: [learner]
+    subject: "Referral bonus: open roles in Marketing"
+    sent: "D-8 13:20"
+    read: true
+    body: |
+      Hi {{learner_first}},
+
+      We're hiring a Product Marketing Manager and a Field Marketing Specialist. Referrals qualify for the referral bonus.
+
+      Jamal
+
+  - id: m-45
+    from: priya
+    to: [learner]
+    subject: "Operations update: Denver warehouse move"
+    sent: "D-7 09:00"
+    read: true
+    body: |
+      All,
+
+      The Denver warehouse move completes next month. Shipping is unaffected. Thanks to the Operations team for the planning.
+
+      Priya
+
+  - id: m-46
+    from: grace
+    to: [learner]
+    subject: "Marketing weekly: launches, events, wins"
+    sent: "D-3 17:00"
+    read: true
+    body: |
+      Team,
+
+      This week: Helix content is in review, the analyst briefing request from Aldermont is in, and the brand refresh guidelines are on the Marketing site.
+
+      Grace
+
+  - id: m-47
+    from: ingrid
+    to: [learner]
+    subject: "New: Microsoft 365 Copilot tips page"
+    sent: "D-6 08:30"
+    read: true
+    body: |
+      Hello,
+
+      We've published a Copilot tips page on the IT site with prompts that work well for summaries, drafting and meeting prep.
+
+      IT Service Desk
+
+  - id: m-48
+    from: olivia
+    to: [learner]
+    subject: "Zava wellbeing week"
+    sent: "D-5 12:00"
+    read: true
+    body: |
+      Hi all,
+
+      Wellbeing week starts next Monday with lunchtime walks at every office and a session on focus time. Sign up on the HR site.
+
+      Olivia
+
+  - id: m-49
+    from: elena
+    to: [learner]
+    subject: "Q3 results: thank you"
+    sent: "D-4 18:00"
+    read: true
+    body: |
+      Everyone,
+
+      Q3 revenue grew 14% year on year, led by the Gen2 refresh. Thank you for the work behind it. Helix is next, and I'm looking forward to it.
+
+      Elena
+
+  - id: m-50
+    from: liam
+    to: [learner]
+    subject: "Dublin office social: Thursday"
+    sent: "D-2 11:30"
+    read: false
+    body: |
+      Hi all,
+
+      The Dublin office social is on Thursday at 17:30. Everyone in town is welcome.
+
+      Liam
+
+  - id: m-51
+    from: kenji
+    to: [learner]
+    subject: "Action needed: confirm your MFA methods"
+    sent: "D-2 09:00"
+    read: false
+    body: |
+      Hello,
+
+      Please confirm your sign-in methods are up to date by the end of the week. No action is needed if you already use the Authenticator app.
+
+      Security Operations
+
+  - id: m-52
+    from: victor
+    to: [learner]
+    subject: "Forecast submissions due"
+    sent: "D-12 14:15"
+    read: true
+    body: |
+      Hi,
+
+      Q4 forecast submissions are due next Friday. Launch programmes should include expected first-month units.
+
+      Victor

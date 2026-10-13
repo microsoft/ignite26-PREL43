@@ -1,0 +1,80 @@
+{
+  "name": "helix-readiness",
+  "version": "1.0.0",
+  "track": "COWORK-T1 Launch Command Center",
+  "description": "Run by `check` on every new seat before release. A seat is ready only when the six day-one items are present, every seeded fact is anchored in the seat's data, the content is searchable, and nothing in the seat already satisfies a scoring check.",
+
+  "day_one": [
+    { "id": "cowork-access", "where": "Microsoft 365 Copilot", "what": "Cowork appears beside Chat",
+      "type": "seat_access", "params": {} },
+    { "id": "supplier-thread", "where": "Outlook > Inbox", "what": "A thread of 6 messages about a supplier that's at risk",
+      "type": "mail_thread", "params": { "subject_contains": "Helix sensor modules: capacity risk", "count": 6 } },
+    { "id": "channel-posts", "where": "Microsoft Teams > Launch - Helix", "what": "Roughly 20 posts in the channel",
+      "type": "channel_messages", "params": { "count": 20 } },
+    { "id": "shared-files", "where": "Launch - Helix > Shared", "what": "Spec, plan, pricing and three competitor PDFs",
+      "type": "channel_files", "params": { "folder": null, "names": ["Helix-Product-Spec.docx", "Helix-Launch-Plan.docx", "Helix-Pricing.xlsx", "Competitor-1-SensorCloud.pdf", "Competitor-2-EdgeSense.pdf", "Competitor-3-Gen3.pdf"] } },
+    { "id": "recordings", "where": "Launch - Helix > Shared > Recordings", "what": "Helix-Sync-Notes-1.docx and Helix-Sync-Notes-2.docx",
+      "type": "channel_files", "params": { "folder": "Recordings", "names": ["Helix-Sync-Notes-1.docx", "Helix-Sync-Notes-2.docx"] } },
+    { "id": "calendar", "where": "Outlook > Calendar", "what": "4 meetings over the next 5 days, at least 2 overlapping",
+      "type": "calendar_window", "params": { "from": "D 00:00", "to": "D+6 00:00", "count": 4, "min_overlaps": 1,
+        "free_slots": ["D+1 10:00", "D+1 14:00", "D+1 16:00"], "slot_minutes": 30 } }
+  ],
+
+  "facts": [
+    { "id": "F1", "ground_truth": "Corvane can ship 60% of the sensor modules on time and 40% eight days late; a decision is due by end of day D+2 and is unanswered.",
+      "anchors": [ { "kind": "mail", "id": "s-3", "contains": ["60%", "eight days late"] },
+                   { "kind": "mail", "id": "s-6", "contains": ["hold the full order"] },
+                   { "kind": "file", "name": "Helix-Sync-Notes-2.docx", "contains": ["60%", "No decision"] } ],
+      "copilot_question": "What is the status of the Helix sensor module supplier?",
+      "expected_answer_contains": ["60%", "40%", "eight days"] },
+    { "id": "F2", "ground_truth": "The launch price (249 or 279) and the Gen2 fallback are both undecided, and no owner is named for either decision.",
+      "anchors": [ { "kind": "post", "id": "p-06", "contains": ["249 or 279"] },
+                   { "kind": "post", "id": "p-10", "contains": ["Gen2"] },
+                   { "kind": "file", "name": "Helix-Pricing.xlsx", "contains": ["249", "279", "Not yet decided"] } ],
+      "copilot_question": "Has the Helix launch price been decided?",
+      "expected_answer_contains": ["249", "279"] },
+    { "id": "F3", "ground_truth": "The spec and the launch plan disagree on launch markets, battery life, firmware version and certification timing.",
+      "anchors": [ { "kind": "file", "name": "Helix-Product-Spec.docx", "contains": ["United States, the United Kingdom and Germany", "18 months", "version 2.1", "FCC and CE certification must be complete before Helix ships"] },
+                   { "kind": "file", "name": "Helix-Launch-Plan.docx", "contains": ["United States and the United Kingdom", "24-month battery life", "firmware version 2.0", "CE certification expected"] },
+                   { "kind": "post", "id": "p-16", "contains": ["CE certification"] } ],
+      "copilot_question": "Where do the Helix spec and launch plan disagree?",
+      "expected_answer_contains": ["Germany", "battery", "firmware", "CE"] },
+    { "id": "F4", "ground_truth": "The Helix supplier call (11:00-12:00) and the Helix price decision (11:30-12:30) overlap tomorrow.",
+      "anchors": [ { "kind": "event", "id": "ev-101", "subject": "Helix supplier call" },
+                   { "kind": "event", "id": "ev-102", "subject": "Helix price decision" } ],
+      "copilot_question": "Do I have overlapping Helix meetings this week?",
+      "expected_answer_contains": ["supplier call", "price decision"] },
+    { "id": "F5", "ground_truth": "\"2x more accurate than SensorCloud\" has no supporting source; SensorCloud Pro's published accuracy equals Helix's.",
+      "anchors": [ { "kind": "post", "id": "p-14", "contains": ["2x more accurate"] },
+                   { "kind": "file", "name": "Competitor-1-SensorCloud.pdf", "contains": ["0.2"] } ],
+      "copilot_question": "Is there evidence that Helix is twice as accurate as SensorCloud?",
+      "expected_answer_contains": ["0.2"] },
+    { "id": "F6", "ground_truth": "Elena Marsh (CEO) is asking whether the date holds before the readiness review. Expected recommendation: CONDITIONAL GO, subject to the supplier decision, CE timing and the price decision.",
+      "anchors": [ { "kind": "mail", "id": "m-30", "contains": ["does the ship date hold"] },
+                   { "kind": "event", "id": "ev-103", "subject": "Helix readiness review" } ],
+      "copilot_question": "Who is asking whether the Helix date holds?",
+      "expected_answer_contains": ["Elena"] },
+    { "id": "W1/W2", "ground_truth": "Hannah Schmidt (D-6) and Marcus Hale (D-4) have waited longest for replies.",
+      "anchors": [ { "kind": "mail", "id": "m-21", "contains": ["customer FAQ"] },
+                   { "kind": "mail", "id": "m-24", "contains": ["249 or 279"] } ],
+      "copilot_question": "Who is waiting on me about Helix?",
+      "expected_answer_contains": ["Hannah", "Marcus"] }
+  ],
+
+  "indexing": [
+    { "id": "mail-index", "type": "mail_search", "query": "Corvane", "min": 1,
+      "why": "Cowork and the catch-up find mail through the mailbox search index." },
+    { "id": "files-index", "type": "drive_search", "query": "Helix-Pricing", "min": 1,
+      "why": "Channel files must be in the SharePoint search index before Copilot can ground on them." }
+  ],
+
+  "integrity": {
+    "type": "baseline_score",
+    "why": "Scoring reads the learner's own data. A fresh seat must score 0 on every check except third-block-cancelled, which passes by absence.",
+    "expected": { "third-block-cancelled": 10 }
+  },
+
+  "copilot_spot_check": {
+    "how": "Microsoft 365 Copilot cannot be queried with app-only credentials. Before each event, a proctor signs in to one ready seat and asks each copilot_question; the answer should contain every expected_answer_contains term. One seat per batch is enough, because every seat is written from the same data pack."
+  }
+}
