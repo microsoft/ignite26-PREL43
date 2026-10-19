@@ -1,0 +1,20 @@
+# Step: Turn the brief into a pitch deck
+checks:
+  - id: pitch_deck
+    type: onedrive_file
+    description: Pitch deck generated from the brief
+    params:
+      folder: /Cowork
+      name_pattern: "*"
+      extensions: [pptx]
+      content_contains: ["Contoso"]
+    retry_window_seconds: 45
+    fail_message: >-
+      No PowerPoint deck mentioning Contoso was found in your OneDrive Cowork folder since your lab started.
+
+  - id: cowork_audit
+    type: copilot_audit
+    description: Purview audit confirms Copilot activity
+    mode: deferred
+    params:
+      app_identity_contains: ["Copilot"]

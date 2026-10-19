@@ -1,0 +1,11 @@
+# Step: Email the brief to your manager
+checks:
+  - id: brief_emailed
+    type: mail_sent
+    description: Brief sent to the manager with the document attached
+    params:
+      subject_contains: ["Contoso"]
+      require_attachment: true
+    retry_window_seconds: 30
+    fail_message: >-
+      No sent email with "Contoso" in the subject and an attachment was found since your lab started.

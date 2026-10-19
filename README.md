@@ -30,7 +30,7 @@ Scoring: 12 automatic checks, 100 points, pass mark 70. Learner instructions are
 | [`img/`](img/) | Diagrams |
 | [`infra/`](infra/) | Configuration template and Entra app registration setup |
 | [`instructions/`](instructions/) | Learner lab guide (plain and Skillable markdown) and instructor notes |
-| [`src/`](src/) | `vs-hydrate` engine, its tests, and the data pack builder |
+| [`src/`](src/) | `vs-hydrate` engine, its tests, the data pack builder, and the Scoring Engine web application ([`src/scoring-engine/`](src/scoring-engine/)) |
 
 ## Quick start
 
@@ -55,6 +55,8 @@ vs-hydrate score --seat lab0001@zava.example --offline
 
 Running against a real tenant: [docs/operator-guide.md](docs/operator-guide.md).
 
+Deploying the Scoring Engine (admin portal, live leaderboard and participant scorecard) into the same tenant: [src/scoring-engine/docs/DEPLOY.md](src/scoring-engine/docs/DEPLOY.md). Tenant and subscription are the only required settings.
+
 ### Development
 
 ```bash
@@ -70,6 +72,7 @@ python -m pytest src/engine/tests -q    # offline tests
 | Data pack, readiness check set, scorecard | Complete for 1.0.0 |
 | Engine against the in-memory tenant | Complete; 23 tests pass |
 | Engine against a real Microsoft 365 tenant | Not yet run; first pilot needs a test tenant |
+| Scoring Engine web application | Runs locally against mock Microsoft 365 data; first tenant deployment pending tenant access |
 | Delivery | Private GitHub repository in Skillable's organisation; releases are git tags (`v1.0.0`) |
 
 ## Notes

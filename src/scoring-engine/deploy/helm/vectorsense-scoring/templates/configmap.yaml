@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "vs.fullname" . }}-config
+  labels: {{- include "vs.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-10"
+    helm.sh/hook-delete-policy: before-hook-creation
+data:
+  VS_ENVIRONMENT: {{ .Values.config.environment | quote }}
+  VS_PUBLIC_BASE_URL: {{ include "vs.publicBaseUrl" . | quote }}
+  VS_SCORECARD_BASE_URL: {{ include "vs.scorecardBaseUrl" . | quote }}
+  VS_AUTH_MODE: {{ .Values.config.authMode | quote }}
+  VS_ENTRA_TENANT_ID: {{ .Values.config.entraTenantId | quote }}
+  VS_ENTRA_API_CLIENT_ID: {{ .Values.config.entraApiClientId | quote }}
+  VS_ENTRA_SPA_CLIENT_ID: {{ .Values.config.entraSpaClientId | quote }}
+  VS_ENTRA_REQUIRED_ROLE: {{ .Values.config.entraRequiredRole | quote }}
+  VS_GRAPH_MODE: {{ .Values.config.graphMode | quote }}
+  VS_GRAPH_TENANT_ID: {{ .Values.workloadIdentity.tenantId | quote }}
+  VS_GRAPH_MAX_CONCURRENCY: {{ .Values.config.graphMaxConcurrency | quote }}
+  VS_WORKER_CONCURRENCY: {{ .Values.config.workerConcurrency | quote }}
+  VS_DEFERRED_RECHECK_INTERVAL_SECONDS: {{ .Values.config.deferredRecheckIntervalSeconds | quote }}
+  VS_DEFERRED_MAX_AGE_SECONDS: {{ .Values.config.deferredMaxAgeSeconds | quote }}

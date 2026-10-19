@@ -1,0 +1,25 @@
+# Step: Draft the Contoso account brief
+# Cowork saves new outputs to the user's OneDrive "Cowork" folder.
+# [VERIFY] the exact folder path and createdBy.application value on a real Cowork run, then tighten below.
+checks:
+  - id: brief_document
+    type: onedrive_file
+    description: Account brief saved by Cowork
+    params:
+      folder: /Cowork
+      name_pattern: "*brief*"
+      extensions: [docx]
+      content_contains: ["Contoso"]
+    retry_window_seconds: 45
+    fail_message: >-
+      We could not find a Word document with "brief" in its name in your OneDrive Cowork folder,
+      created after your lab started and mentioning Contoso.
+
+  - id: cowork_prompt
+    type: copilot_interaction
+    description: Cowork was prompted to do the work
+    # Deferred until interaction-export latency is measured in the tenant; switch to
+    # blocking + retry_window_seconds once it is reliably under a minute.
+    mode: deferred
+    params:
+      prompt_contains: ["Contoso"]

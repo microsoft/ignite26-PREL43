@@ -1,0 +1,13 @@
+# Step: Compile the revenue workbook
+checks:
+  - id: revenue_workbook
+    type: onedrive_file
+    description: Revenue workbook compiled by Cowork
+    params:
+      folder: /Cowork
+      name_pattern: "*revenue*"
+      extensions: [xlsx]
+      content_contains: ["Revenue", "Region"]
+    retry_window_seconds: 45
+    fail_message: >-
+      No Excel workbook named like "revenue" with Revenue and Region columns was found in your OneDrive Cowork folder.

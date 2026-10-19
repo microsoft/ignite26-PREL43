@@ -1,0 +1,9 @@
+# Step: Send the weekly summary
+checks:
+  - id: weekly_summary
+    type: mail_sent
+    description: Weekly summary email sent
+    params:
+      subject_contains: ["Weekly"]
+    retry_window_seconds: 30
+    fail_message: No sent email with "Weekly" in the subject was found since your lab started.

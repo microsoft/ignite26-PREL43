@@ -1,0 +1,11 @@
+# Step: Schedule the account review
+checks:
+  - id: review_meeting
+    type: calendar_event
+    description: Teams meeting created for the account review
+    params:
+      subject_contains: ["Contoso"]
+      require_online_meeting: true
+    retry_window_seconds: 30
+    fail_message: >-
+      No Teams meeting with "Contoso" in the title was created in your calendar since your lab started.

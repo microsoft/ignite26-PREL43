@@ -1,0 +1,44 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "vs.fullname" . }}
+  labels: {{- include "vs.labels" . | nindent 4 }}
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-body-size: "2m"
+    {{- if .Values.ingress.tls.keyVaultCertificateUri }}
+    kubernetes.azure.com/tls-cert-keyvault-uri: {{ .Values.ingress.tls.keyVaultCertificateUri | quote }}
+    {{- end }}
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts: [{{ .Values.adminHost | quote }}, {{ .Values.scorecardHost | quote }}]
+      secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    # Admin portal + partner API. The portal's nginx proxies /api; partner calls go straight to the API.
+    - host: {{ .Values.adminHost | quote }}
+      http:
+        paths:
+          {{- range list "/api" "/v1" "/oauth" "/healthz" }}
+          - path: {{ . }}
+            pathType: Prefix
+            backend: {service: {name: {{ include "vs.fullname" $ }}-api, port: {number: 8000}}}
+          {{- end }}
+          - path: /
+            pathType: Prefix
+            backend: {service: {name: {{ include "vs.fullname" . }}-web-admin, port: {number: 8080}}}
+    # Participant scorecard: everything goes through its nginx, which only forwards /api/public and /api/config.
+    - host: {{ .Values.scorecardHost | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: {service: {name: {{ include "vs.fullname" . }}-web-scorecard, port: {number: 8080}}}
+{{- end }}

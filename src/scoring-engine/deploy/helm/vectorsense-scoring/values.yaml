@@ -1,0 +1,93 @@
+# VectorSense Labs - Scoring Engine. Override per tenant with -f values-<tenant>.yaml or --set.
+
+image:
+  registry: ""            # e.g. vslprodacr.azurecr.io
+  backend: vectorsense/scoring-backend
+  admin: vectorsense/scoring-admin
+  scorecard: vectorsense/scoring-scorecard
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+adminHost: scoring-admin.example.com      # admin portal + partner API (/v1, /oauth)
+scorecardHost: scorecard.example.com       # participant scorecard (public, read-only)
+
+ingress:
+  enabled: true
+  className: webapprouting.kubernetes.azure.com   # AKS app routing add-on (managed NGINX)
+  tls:
+    enabled: true
+    secretName: vectorsense-scoring-tls             # one certificate covering both hosts, or keyvault annotation below
+    keyVaultCertificateUri: ""                      # https://<kv>.vault.azure.net/certificates/<name>
+  annotations: {}
+
+# Workload identity: the user-assigned managed identity that reads Key Vault and calls Microsoft Graph.
+workloadIdentity:
+  clientId: ""            # UAMI client ID (Bicep output: workloadIdentityClientId)
+  tenantId: ""            # tenant of the deployment (Ignite-tenant)
+
+config:
+  environment: production
+  authMode: entra                    # entra | local (local only for test environments)
+  entraTenantId: ""
+  entraApiClientId: ""               # app registration exposing api://<id>/access_as_admin + app role Scoring.Admin
+  entraSpaClientId: ""               # SPA app registration used by the portal
+  entraRequiredRole: Scoring.Admin
+  graphMode: live                    # live | mock
+  graphMaxConcurrency: 16
+  workerConcurrency: 8
+  deferredRecheckIntervalSeconds: 300
+  deferredMaxAgeSeconds: 10800
+
+# Secrets come from Azure Key Vault through the Secrets Store CSI driver (synced into a k8s Secret).
+keyVault:
+  enabled: true
+  name: ""                           # Key Vault name (Bicep output: keyVaultName)
+  objects:                           # k8s env var <- Key Vault secret name
+    VS_DATABASE_URL: database-url
+    VS_JWT_SIGNING_KEY: jwt-signing-key
+    VS_SECRET_PEPPER: secret-pepper
+    VS_ADMIN_PASSWORD: admin-password
+# Alternative to Key Vault: an existing Secret with the same keys.
+existingSecret: ""
+
+api:
+  replicas: 3
+  resources:
+    requests: {cpu: 250m, memory: 384Mi}
+    limits: {cpu: "1", memory: 768Mi}
+  autoscaling: {enabled: true, minReplicas: 3, maxReplicas: 12, targetCPU: 65}
+
+worker:
+  replicas: 2
+  resources:
+    requests: {cpu: 250m, memory: 384Mi}
+    limits: {cpu: "1", memory: 768Mi}
+  autoscaling: {enabled: true, minReplicas: 2, maxReplicas: 8, targetCPU: 60}
+
+webAdmin:
+  replicas: 2
+  resources:
+    requests: {cpu: 50m, memory: 64Mi}
+    limits: {cpu: 250m, memory: 128Mi}
+
+webScorecard:
+  replicas: 2
+  resources:
+    requests: {cpu: 50m, memory: 64Mi}
+    limits: {cpu: 250m, memory: 128Mi}
+
+migrations:
+  enabled: true
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  fsGroup: 10001
+  seccompProfile: {type: RuntimeDefault}
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities: {drop: ["ALL"]}
+
+nodeSelector: {}
+tolerations: []

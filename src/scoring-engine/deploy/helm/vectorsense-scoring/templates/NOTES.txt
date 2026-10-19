@@ -1,0 +1,7 @@
+VectorSense Labs - Scoring Engine deployed.
+
+  Admin portal:      {{ include "vs.publicBaseUrl" . }}
+  Scorecard:         {{ include "vs.scorecardBaseUrl" . }}/<event_id>
+  Vendor token:      POST {{ include "vs.publicBaseUrl" . }}/oauth/token
+  Complete endpoint: POST {{ include "vs.publicBaseUrl" . }}/v1/steps/complete
+  API reference:     {{ include "vs.publicBaseUrl" . }}/api/docs
