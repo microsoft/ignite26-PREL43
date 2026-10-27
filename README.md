@@ -1,80 +1,71 @@
-# Launch Command Center: Delegate, Verify and Automate with Microsoft 365 Copilot Cowork
+# Cowork Lab: hydration and scoring for Skillable
 
-**Track:** COWORK-T1 · Advanced · 3 hours · Individual
+Hydration and scoring for the Copilot Cowork lab **Launch Command Center (COWORK-T1)**. Everything runs
+inside Skillable; nothing is deployed in Azure. Every participant gets a fresh Microsoft 365 tenant.
 
-Zava Corporation's Helix product ships in 10 days, its launch lead has moved on, and the job is now yours. A supplier problem is still open, an executive wants to know whether the date holds, two decisions are stuck in Microsoft Teams, the spec and the launch plan disagree, and your calendar is double-booked. Microsoft 365 Copilot Cowork does the legwork while you keep the final say.
-
-This repository holds the lab instructions and the **Hydration Kit** that builds the lab's Microsoft 365 workplace: it fills a tenant with the Helix launch, prepares one ready seat per learner, checks every seat before release, and scores the learner when they select Submit.
-
-![Hydration Kit flow](img/hydration-flow.svg)
-
-## Lab outline
-
-| Milestone | Time | What the learner does |
+| Part | Where it runs | What it does |
 |---|---|---|
-| M1 Master the delegation controls | 40 min | Sourced catch-up, three reply drafts, stop and resume, Always allow granted and revoked |
-| M2 Build the readiness pack from a single brief | 52 min | Deck, 10-column risk register, one-page customer PDF and status card; traced to source and corrected |
-| M3 Capture your reporting standard as a skill | 35 min | Launch Status Report skill, proven in a new task |
-| M4 Schedule the daily launch briefing | 23 min | Weekday 8am briefing; first send approved |
-| M5 Combine skills into a toolkit (optional) | 44 min | Second skill with a template, both skills in one task, shared, inventoried |
+| **Hydration** | One life cycle action, *Execute Script in Virtual Machine*, at First Displayable. It runs the HelixKit scripts from an ISO attached to the lab VM | Pre-flight (Graph permissions, learner, licences), then writes the Helix launch story into the learner's Microsoft 365 (people, Teams channel, files, mail, calendar), then a readiness check |
+| **Scoring** | Five scored Activities, *Check my work* at the end of each milestone (12 small cloud scripts) | Reads the learner's mail, calendar and OneDrive; each item turns green, or red with a hint. 100 points, pass mark 70 |
 
-Scoring: 12 automatic checks, 100 points, pass mark 70. Learner instructions are in [instructions/](instructions/).
+## Start here
 
-## Repository layout
+**Setting up or testing a lab profile? Open [STEPS.txt](STEPS.txt)** and follow it top to bottom. Everything it
+asks you to paste or upload is in [skillable/](skillable):
 
-| Folder | Contents |
+```
+skillable/
+  HelixKit-1.0.4.iso                          upload as removable media, attach to the lab VM
+  lifecycle/Prepare-Helix-Workspace.ps1       the one hydration life cycle action (VM script)
+  activities/M1 ... M5/*.ps1                  the 12 Check my work scripts (cloud scripts)
+  Lab-Instructions.md                         full lab guide: sign-in, status line, Check my work blocks
+  optional/TapPolicy.ps1, TapIssue.ps1        only if the lab's own TAP action is ever replaced
+  media/HelixKit/                             what is inside the ISO (for reference)
+```
+
+The package is built for the cloud credential **WWLM365E7**. Learners sign in with each launch's **Office 365 admin** (Administrative Username/Password in Lab Access). The life cycle action makes sure that admin has a Copilot licence and puts the Helix data in its mailbox, calendar and the Launch - Helix team.
+
+## Documents
+
+| Document | Use it to |
 |---|---|
-| [`.github/`](.github/) | CI: validates the data sources, runs the tests, rehearses the operator flow offline |
-| [`data/`](data/) | The Helix story as data (`helix/`), the built data pack (`release/`), the readiness check set and the scorecard |
-| [`docs/`](docs/) | Operator guide for the lab host, engine and data pack references, release notes |
-| [`img/`](img/) | Diagrams |
-| [`infra/`](infra/) | Configuration template and Entra app registration setup |
-| [`instructions/`](instructions/) | Learner lab guide (plain and Skillable markdown) and instructor notes |
-| [`src/`](src/) | `vs-hydrate` engine, its tests, the data pack builder, and the Scoring Engine web application ([`src/scoring-engine/`](src/scoring-engine/)) |
+| [STEPS.txt](STEPS.txt) | Configure the lab profile, launch, test, troubleshoot (plain text, open in Notepad) |
+| [docs/RUNBOOK.md](docs/RUNBOOK.md) | Run an event: before, during and after; sign-off checklist |
+| [docs/lab-profile.md](docs/lab-profile.md) | Every Skillable setting in one place |
+| [docs/tenant-requirements.md](docs/tenant-requirements.md) | What each participant tenant must have (checked by pre-flight) |
+| [docs/implementation-plan.html](docs/implementation-plan.html) | The plan, for sharing |
 
-## Quick start
+## For developers
 
-Requires Python 3.11 or later and git. Run from the repository root:
+The ISO and portable PowerShell ZIP files are stored in Git LFS. Install Git LFS before cloning,
+or run `git lfs pull` in an existing checkout to download them.
 
-```bash
-python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
-pip install ./src/engine
-vs-hydrate --version
+```
+src/common/        Graph client, timeline, text/Office/PDF handling, data pack loader
+src/lifecycle/     Grant, Learner, Preflight, Hydrate, Readiness, Launcher (the VM life cycle action); Tap (optional scripts only)
+src/scoring/       Checks (scorecard check types), Activity (one check per script)
+content/           Lab-Instructions.md (source of the lab guide)
+config/            scorecard.json, readiness.json
+datapack/          helix-datapack-1.0.0.json.gz (240 KB; built into Hydrate.ps1 on the ISO)
+build/Build.ps1    builds skillable/
+tools/             Get-PortablePwsh.ps1, Convert-DataPack.ps1, Invoke-Local.ps1
+tests/             Pester: unit, end-to-end against an in-memory tenant, and the built skillable/ package
 ```
 
-Rehearse the whole operator flow against an in-memory tenant, no Microsoft 365 needed:
+Build (PowerShell 7; `-Iso` needs macOS `hdiutil` or Windows `oscdimg`):
 
-```bash
-cp infra/config/tenant.example.yaml tenant.yaml
-vs-hydrate validate --offline
-vs-hydrate tenant --offline
-vs-hydrate seats --count 3 --offline
-vs-hydrate check --offline
-vs-hydrate score --seat lab0001@zava.example --offline
+```powershell
+./tools/Get-PortablePwsh.ps1                       # once: portable PowerShell 7 for the ISO (vendor/)
+./build/Build.ps1 -CloudCredential WWLM365E7 -Iso
+Install-Module Pester -MinimumVersion 5.5 -Scope CurrentUser   # once
+Invoke-Pester ./tests                              # 76 passed
 ```
 
-Running against a real tenant: [docs/operator-guide.md](docs/operator-guide.md).
+Optional build parameters: `-EventDate yyyy-MM-dd` (otherwise set it in the life cycle script; without one a
+launch uses today), `-EventTimeZone` (default `India Standard Time`), `-LearnerUpn`.
 
-Deploying the Scoring Engine (admin portal, live leaderboard and participant scorecard) into the same tenant: [src/scoring-engine/docs/DEPLOY.md](src/scoring-engine/docs/DEPLOY.md). Tenant and subscription are the only required settings.
-
-### Development
-
-```bash
-pip install -e "./src/engine[test]" python-docx openpyxl reportlab pillow
-python src/tools/build_datapack.py      # rebuild data/release/helix-datapack-1.0.0.zip after editing data/helix/
-python -m pytest src/engine/tests -q    # offline tests
-```
-
-## Status
-
-| Component | State |
+| Change | Do |
 |---|---|
-| Data pack, readiness check set, scorecard | Complete for 1.0.0 |
-| Engine against the in-memory tenant | Complete; 23 tests pass |
-| Engine against a real Microsoft 365 tenant | Not yet run; first pilot needs a test tenant |
-| Scoring Engine web application | Runs locally against mock Microsoft 365 data; first tenant deployment pending tenant access |
-| Delivery | Private GitHub repository in Skillable's organisation; releases are git tags (`v1.0.0`) |
-
-## Notes
-
-Zava Corporation is Microsoft's fictional company. Every person, company and product in the lab data is fictional. See [LICENSE](LICENSE) for code and [LICENSE-DOCS](LICENSE-DOCS) for documentation.
+| New data pack release | `./tools/Convert-DataPack.ps1 -Zip <path>/helix-datapack-<v>.zip` (needs `powershell-yaml`), rebuild, upload the new ISO |
+| Scorecard change | Update `config/scorecard.json`, rebuild, re-paste the affected activity scripts |
+| Lab guide change | Edit `content/Lab-Instructions.md`, rebuild, re-paste |

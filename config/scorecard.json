@@ -1,0 +1,221 @@
+{
+  "track": "COWORK-T1",
+  "name": "Launch Command Center",
+  "version": "1.0.0",
+  "max": 100,
+  "pass_mark": 70,
+  "window": {
+    "start": "D-1",
+    "end": "D+14"
+  },
+  "checks": [
+    {
+      "id": "drafts-saved",
+      "milestone": "M1",
+      "points": 8,
+      "skill_area": "Functional correctness",
+      "passes_when": "Found a reply from Cowork (it says \"Sent by Copilot Cowork\") in your mail.",
+      "type": "mail_contains",
+      "params": {
+        "phrase": "Sent by Copilot Cowork",
+        "folders": [
+          "drafts",
+          "sentitems",
+          "inbox"
+        ]
+      },
+      "hint": "Go to step 1.4. Keep or send at least one of the three reply drafts from Cowork."
+    },
+    {
+      "id": "focus-block-approved",
+      "milestone": "M1",
+      "points": 7,
+      "skill_area": "Functional correctness",
+      "passes_when": "Found \"Helix messaging review\" on your calendar.",
+      "type": "event_exists",
+      "params": {
+        "subject": "Helix messaging review"
+      },
+      "hint": "Go to step 1.8. Approve the first focus block on the approval card."
+    },
+    {
+      "id": "focus-block-always-allow",
+      "milestone": "M1",
+      "points": 7,
+      "skill_area": "Functional correctness",
+      "passes_when": "Found \"Helix launch checklist\" on your calendar.",
+      "type": "event_exists",
+      "params": {
+        "subject": "Helix launch checklist"
+      },
+      "hint": "Go to step 1.9. Ask for the second focus block after you choose Always allow."
+    },
+    {
+      "id": "third-block-cancelled",
+      "milestone": "M1",
+      "points": 10,
+      "skill_area": "Security and governance",
+      "passes_when": "There is no \"Helix status review\" event on your calendar.",
+      "type": "event_absent",
+      "params": {
+        "subject": "Helix status review"
+      },
+      "hint": "Go to step 1.10. Cancel the third request. If \"Helix status review\" is on your calendar, delete it."
+    },
+    {
+      "id": "risk-register-columns",
+      "milestone": "M2",
+      "points": 10,
+      "skill_area": "Functional correctness",
+      "passes_when": "Found a risk register with a \"Source evidence\" column in your OneDrive.",
+      "type": "drive_file_contains",
+      "params": {
+        "phrase": "Source evidence",
+        "case_sensitive": false,
+        "extensions": [
+          ".xlsx",
+          ".csv",
+          ".docx",
+          ".md"
+        ]
+      },
+      "recheck_on_fail": true,
+      "hint": "Go to step 2.1. The risk register needs a \"Source evidence\" column. Ask Cowork to add it."
+    },
+    {
+      "id": "unconfirmed-marked",
+      "milestone": "M2",
+      "points": 7,
+      "skill_area": "Security and governance",
+      "passes_when": "Found UNCONFIRMED in your readiness files.",
+      "type": "drive_file_contains",
+      "params": {
+        "phrase": "UNCONFIRMED",
+        "case_sensitive": true,
+        "extensions": [
+          ".xlsx",
+          ".csv",
+          ".docx",
+          ".pptx",
+          ".pdf"
+        ],
+        "exclude_name_patterns": [
+          "SKILL.md",
+          "skill-quality-report"
+        ]
+      },
+      "recheck_on_fail": true,
+      "hint": "Go to step 2.10. A risk with no named owner must say UNCONFIRMED. Ask Cowork to fix it."
+    },
+    {
+      "id": "skill-saved",
+      "milestone": "M3",
+      "points": 12,
+      "skill_area": "Architecture and best practices",
+      "passes_when": "Found the launch-status-report skill in your OneDrive.",
+      "type": "drive_item_name",
+      "params": {
+        "pattern": "launch-status-report"
+      },
+      "recheck_on_fail": true,
+      "hint": "Go to step 3.3. Select Approve on the Copy file card for skills/launch-status-report."
+    },
+    {
+      "id": "status-report-produced",
+      "milestone": "M3",
+      "points": 10,
+      "skill_area": "Functional correctness",
+      "passes_when": "Found a Helix-Status report in your OneDrive.",
+      "type": "drive_item_name",
+      "params": {
+        "pattern": "Helix-Status",
+        "files_only": true
+      },
+      "recheck_on_fail": true,
+      "hint": "Go to step 3.6. Start a New task and ask for this week's Helix launch status report."
+    },
+    {
+      "id": "briefing-email-received",
+      "milestone": "M4",
+      "points": 15,
+      "skill_area": "Functional correctness",
+      "passes_when": "Found the \"Helix launch briefing\" email in your Inbox.",
+      "type": "mail_subject",
+      "params": {
+        "subject_prefix": "Helix launch briefing",
+        "folders": [
+          "inbox"
+        ]
+      },
+      "hint": "Go to step 4.3. Tick Run once now, select Schedule, then select Send on the card."
+    },
+    {
+      "id": "meeting-prep-skill",
+      "milestone": "M5",
+      "points": 5,
+      "skill_area": "Architecture and best practices",
+      "passes_when": "Found the helix-meeting-prep skill in your OneDrive.",
+      "type": "drive_item_name",
+      "params": {
+        "pattern": "helix-meeting-prep"
+      },
+      "recheck_on_fail": true,
+      "hint": "Go to step 5.2. Select Approve on the Copy file card for skills/helix-meeting-prep."
+    },
+    {
+      "id": "companion-template",
+      "milestone": "M5",
+      "points": 4,
+      "skill_area": "Architecture and best practices",
+      "passes_when": "Found brief-template in your OneDrive.",
+      "type": "drive_item_name",
+      "params": {
+        "pattern": "brief-template",
+        "files_only": true
+      },
+      "recheck_on_fail": true,
+      "hint": "Go to step 5.3. Add brief-template.docx to the helix-meeting-prep skill."
+    },
+    {
+      "id": "skill-inventory",
+      "milestone": "M5",
+      "points": 5,
+      "skill_area": "Functional correctness",
+      "passes_when": "Found Skill-Inventory in your OneDrive.",
+      "type": "drive_item_name",
+      "params": {
+        "pattern": "Skill-Inventory",
+        "files_only": true
+      },
+      "recheck_on_fail": true,
+      "hint": "Go to step 5.9. Create a Word file named Skill-Inventory.docx in OneDrive."
+    }
+  ],
+  "guards": {
+    "third-block-cancelled": {
+      "enabled": false,
+      "requires_any": [
+        "focus-block-approved",
+        "focus-block-always-allow"
+      ],
+      "note": "Off to match the published scorecard. When on, the 10 points need at least one focus block, so a learner who skips M1 does not earn them."
+    }
+  },
+  "seed_rules": {
+    "forbidden": [
+      "Sent by Copilot Cowork",
+      "Helix messaging review",
+      "Helix launch checklist",
+      "Helix status review",
+      "Source evidence",
+      "UNCONFIRMED",
+      "launch-status-report",
+      "Helix-Status",
+      "Helix launch briefing",
+      "helix-meeting-prep",
+      "brief-template",
+      "Skill-Inventory"
+    ],
+    "note": "No seeded mail, post, event, file name or file content may contain these phrases (case-insensitive)."
+  }
+}

@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cowork Lab on Skillable: Implementation Plan</title>
+<style>
+  :root {
+    --bg: #ffffff; --surface: #f7f9fc; --border: #e3e8f0; --text: #14213d; --muted: #52607a; --faint: #8a95aa;
+    --primary: #3b5bdb; --primary-soft: #eef2ff; --ok: #15803d; --ok-soft: #e9f7ee; --warn: #b45309; --warn-soft: #fff6e6;
+    --bad: #b91c1c; --bad-soft: #fdecec; --code-bg: #0f172a; --code-fg: #e2e8f0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f141d; --surface: #161d2a; --border: #263043; --text: #e6eaf2; --muted: #a8b2c6; --faint: #75809a;
+      --primary: #7b93ff; --primary-soft: #1c2546; --ok: #4ade80; --ok-soft: #132a1d; --warn: #fbbf24; --warn-soft: #2d2311;
+      --bad: #f87171; --bad-soft: #2e1717; --code-bg: #0a0e15; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.6 "Segoe UI", Inter, system-ui, -apple-system, sans-serif; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px 64px; }
+  header.hero { background: linear-gradient(110deg, #2f43b8, #4a57da 50%, #5b45e0); color: #fff; padding: 40px 0 34px; margin-bottom: 28px; }
+  header.hero .eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; opacity: .85; font-weight: 600; }
+  header.hero h1 { font-size: 32px; font-weight: 600; margin: 8px 0 6px; letter-spacing: -.01em; }
+  header.hero p { margin: 0; max-width: 720px; opacity: .92; }
+  header.hero .meta { margin-top: 16px; font-size: 13px; opacity: .85; }
+  nav.toc { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; margin-bottom: 28px; }
+  nav.toc b { display: block; margin-bottom: 6px; }
+  nav.toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 32px; }
+  nav.toc a { color: var(--primary); text-decoration: none; }
+  nav.toc a:hover { text-decoration: underline; }
+  h2 { font-size: 22px; margin: 40px 0 10px; padding-bottom: 8px; border-bottom: 2px solid var(--border); scroll-margin-top: 16px; }
+  h3 { font-size: 17px; margin: 24px 0 8px; }
+  p { margin: 8px 0; }
+  .muted { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--surface); font-size: 12.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  code { font-family: "JetBrains Mono", Consolas, Menlo, monospace; font-size: 12.8px; background: var(--surface); border: 1px solid var(--border); padding: 0 4px; border-radius: 4px; }
+  pre { background: var(--code-bg); color: var(--code-fg); padding: 14px 16px; border-radius: 10px; overflow-x: auto; font-size: 12.8px; line-height: 1.55; }
+  pre code { background: none; border: none; padding: 0; color: inherit; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 12px 0 18px; }
+  .card { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; background: var(--bg); }
+  .card .k { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+  .card .v { font-size: 18px; font-weight: 600; margin-top: 4px; }
+  .card p { font-size: 13.5px; color: var(--muted); margin: 6px 0 0; }
+  .callout { border-left: 4px solid var(--primary); background: var(--primary-soft); padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+  .callout.warn { border-color: var(--warn); background: var(--warn-soft); }
+  .callout.ok { border-color: var(--ok); background: var(--ok-soft); }
+  .tag { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--border); }
+  .tag.verify { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
+  .tag.decision { color: var(--primary); background: var(--primary-soft); border-color: transparent; }
+  .flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; margin: 14px 0 6px; }
+  .flow .step { flex: 1 1 150px; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--surface); position: relative; }
+  .flow .step b { display: block; font-size: 13.5px; }
+  .flow .step span { font-size: 12.5px; color: var(--muted); }
+  .flow .step .when { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--primary); font-weight: 700; }
+  .flow .step.part1 { border-top: 3px solid #3b5bdb; }
+  .flow .step.part2 { border-top: 3px solid #15803d; }
+  .legend { font-size: 12.5px; color: var(--muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin: 0 4px 0 10px; vertical-align: middle; }
+  ul.check { list-style: none; padding-left: 0; }
+  ul.check li { padding-left: 24px; position: relative; margin: 4px 0; }
+  ul.check li::before { content: "\2610"; position: absolute; left: 0; color: var(--muted); }
+  .mock { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin: 12px 0; max-width: 520px; }
+  .mock .bar { background: var(--surface); padding: 8px 12px; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border); }
+  .mock .row { display: flex; gap: 10px; align-items: center; padding: 7px 12px; font-size: 13.5px; border-bottom: 1px solid var(--border); }
+  .mock .row:last-child { border-bottom: none; }
+  .mock .ok { color: var(--ok); font-weight: 700; }
+  .mock .no { color: var(--bad); font-weight: 700; }
+  .mock .hint { font-size: 12.5px; color: var(--muted); }
+  .mock .btn { display: inline-block; background: var(--primary); color: #fff; padding: 5px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+  footer { margin-top: 48px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--faint); }
+  @media (max-width: 720px) { nav.toc ol { columns: 1; } header.hero h1 { font-size: 26px; } }
+  @media print {
+    header.hero { background: #2f43b8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    h2 { page-break-after: avoid; } table, pre, .mock { page-break-inside: avoid; } nav.toc { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap" style="padding-bottom:0">
+    <div class="eyebrow">COWORK-T1 · Launch Command Center · Implementation plan</div>
+    <h1>Cowork Lab on Skillable</h1>
+    <p>Hydration and scoring for the Copilot Cowork lab, built entirely inside Skillable as PowerShell scripts. Every participant gets a fresh Microsoft 365 tenant; nothing is deployed in Azure.</p>
+    <div class="meta">Status: built (v1.0.0) · Scope: Option 1 (no external services) · Code: Skillable-Lifecycle repository</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="toc">
+  <b>Contents</b>
+  <ol>
+    <li><a href="#summary">Summary and decisions</a></li>
+    <li><a href="#flow">How a lab runs, end to end</a></li>
+    <li><a href="#profile">Lab profile set-up</a></li>
+    <li><a href="#hydration">Part 1: Hydration</a></li>
+    <li><a href="#scoring">Part 2: Scoring</a></li>
+    <li><a href="#learner">What participants see and click</a></li>
+    <li><a href="#organisers">What organisers see</a></li>
+    <li><a href="#repo">Code layout and build</a></li>
+    <li><a href="#testing">Testing</a></li>
+    <li><a href="#runsheet">Event run sheet</a></li>
+    <li><a href="#owners">Responsibilities and open questions</a></li>
+    <li><a href="#risks">Risks</a></li>
+  </ol>
+</nav>
+
+<h2 id="summary">1. Summary and decisions</h2>
+<div class="cards">
+  <div class="card"><div class="k">Part 1</div><div class="v">Hydration</div><p>One life cycle action at First Displayable runs the HelixKit scripts from an ISO attached to the lab VM and fills the participant's tenant with the Helix launch story before the event.</p></div>
+  <div class="card"><div class="k">Part 2</div><div class="v">Scoring</div><p>Five scored Activities (12 check scripts) run when the participant clicks <b>Check my work</b>; Skillable records the score.</p></div>
+  <div class="card"><div class="k">Language</div><div class="v">PowerShell 7</div><p>Hydration: "Execute Script in Virtual Machine" (HelixKit on removable media). Scoring: "Execute Script in Cloud Platform". Both use Skillable's per-tenant cloud credential.</p></div>
+  <div class="card"><div class="k">Infrastructure</div><div class="v">None</div><p>No Azure deployment and no file hosting: the data pack travels inside the ISO. Results live in Skillable's reports.</p></div>
+</div>
+
+<table>
+  <tr><th style="width:34%">Decision</th><th>Detail</th></tr>
+  <tr><td>Two parts only</td><td>Hydration and scoring, both inside Skillable. No external scoring service, leaderboard or scorecard site (Option 1).</td></tr>
+  <tr><td>One tenant per participant</td><td>Skillable provisions a fresh M365 tenant per participant (10 E7 fictional users, Cowork credits included) and tears it down when the lab ends.</td></tr>
+  <tr><td>Credentials</td><td>All scripts use Skillable's per-tenant cloud credential (<code>@lab.CloudCredential(…)</code>), which has the Graph permissions needed. We register no apps in participant tenants.</td></tr>
+  <tr><td>Dev/test tenant</td><td><code>9e9dab93-f5bd-40b1-bed8-59a535fe26c0</code>: a test app registration there mirrors the Skillable credential's permissions so scripts can be run by hand. Whether it matches the pool template is unknown, so every script runs a pre-flight check.</td></tr>
+  <tr><td>When hydration runs</td><td>At First Displayable (VM scripts cannot run at Post-Build) of <b>pre-built</b> lab instances, so Microsoft 365 has hours to index content before participants arrive.</td></tr>
+  <tr><td>Why an ISO</td><td>Skillable passes a cloud script to PowerShell as one command-line argument, so large scripts fail ("argument list too long"). Hydration (about 370 KB with the data pack) therefore runs inside the pre-built VM from removable media; the 12 check scripts stay small (16–20 KB) and run in the cloud.</td></tr>
+  <tr><td>Dates in the story</td><td>Relative to the <b>event day</b> (<code>$EventDate</code> at the top of the life cycle script). Skillable pre-builds from <b>D−1 09:30</b> in the event time zone, because Teams import refuses future-dated posts.</td></tr>
+  <tr><td>Source of the content and checks</td><td>The existing Cowork-Lab data pack (<code>helix-datapack-1.0.0.zip</code>) and <code>scorecard.json</code> (12 checks, 100 points, pass mark 70). Logic is ported from the <code>glc_hydrate</code> engine.</td></tr>
+</table>
+
+<h2 id="flow">2. How a lab runs, end to end</h2>
+<div class="flow">
+  <div class="step part1"><div class="when">D−1 from 09:30</div><b>Pre-build</b><span>Skillable builds N + 15% lab instances, each with its own tenant.</span></div>
+  <div class="step part1"><div class="when">First Displayable, in the VM</div><b>Pre-flight</b><span>Graph permissions, learner, licences, organiser mailboxes checked before anything is written.</span></div>
+  <div class="step part1"><div class="when">First Displayable</div><b>Hydrate</b><span>Personas, Teams, mail, files, calendar for the learner account.</span></div>
+  <div class="step part1"><div class="when">First Displayable</div><b>Readiness</b><span>Day-one items present; no check passes yet. Failed instances end themselves.</span></div>
+  <div class="step part1"><div class="when">First Displayable</div><b>Learner</b><span>The Office 365 admin is the learner and gets a Copilot licence if needed.</span></div>
+  <div class="step part2"><div class="when">During the lab</div><b>Check my work</b><span>Participant runs the M1–M5 Activities; ticks and hints appear.</span></div>
+  <div class="step part2"><div class="when">Submit / end</div><b>Final score</b><span>Skillable platform scoring totals the Activities; result in Skillable reports.</span></div>
+  <div class="step"><div class="when">Teardown</div><b>Destroy</b><span>Skillable deletes the tenant. Nothing to clean up.</span></div>
+</div>
+<p class="legend"><i style="background:#3b5bdb"></i>Part 1: Hydration <i style="background:#15803d"></i>Part 2: Scoring</p>
+
+<h2 id="profile">3. Lab profile set-up (Skillable Studio)</h2>
+<h3>Cloud credential</h3>
+<p>The Microsoft 365 cloud credential attached to the lab profile (Cloud tab). Its name appears in the three credential tokens at the top of every script, for example <code>@lab.CloudCredential(WWLM365E7).ClientSecret</code>. Read the name from the Cloud tab of the production lab profile and set it in the build step (section 8).</p>
+
+<h3>Removable media</h3>
+<table>
+  <tr><th>Media</th><th>Contents</th><th>Attached to</th></tr>
+  <tr><td><code>HelixKit-&lt;version&gt;.iso</code> (about 107 MB)</td><td><code>HelixKit\</code>: <code>kit.json</code>, <code>Preflight.ps1</code>, <code>Hydrate.ps1</code> (Helix data pack inside), <code>Readiness.ps1</code>, <code>Score-All.ps1</code>, portable PowerShell 7</td><td>The Windows lab VM, inserted at start</td></tr>
+</table>
+<p>Event settings live at the top of the life cycle script: <code>$EventDate</code> (day D; left unset, a launch uses today) and <code>$EventTimeZone</code> (default <code>India Standard Time</code>). The VM needs outbound HTTPS to <code>login.microsoftonline.com</code> and <code>graph.microsoft.com</code>.</p>
+
+<h3>Life cycle actions</h3>
+<table>
+  <tr><th>#</th><th>Event</th><th>Action</th><th>Blocking</th><th>Timeout</th><th>Error action</th><th>Retries</th></tr>
+  <tr><td>existing</td><td>as today</td><td>The lab's TAP action (Azure Portal account): unchanged; our lab doesn't use a TAP</td><td colspan="4">as today</td></tr>
+  <tr><td>new</td><td>First Displayable</td><td><b>Prepare Helix workspace</b>: Execute Script in Virtual Machine, PowerShell. Finds the HelixKit media, uses PowerShell 7 (installed or the portable copy) and runs <b>Grant → Learner → Pre-flight → Hydrate → Readiness</b> (Grant adds any missing Graph permissions to the credential's app as this launch's tenant admin; it does nothing when none are missing); reports <code>PermissionStatus</code>, <code>LearnerUpn</code>, <code>PreflightStatus</code>, <code>HydrationStatus</code>, <code>HydratedAt</code>, <code>ReadinessStatus</code></td><td>Yes</td><td>45 min <span class="tag verify">verify max</span></td><td>End lab</td><td>0</td></tr>
+  <tr><td>—</td><td>Tearing Down</td><td>None: Skillable destroys the tenant</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+</table>
+<div class="callout warn"><b>Why "End lab" and no Repeat on hydration:</b> a tenant that failed hydration must never reach a participant. Skillable re-runs an uncaught script error every 60 seconds for up to 30 minutes, so the scripts catch their own errors, fail clearly once, and let Skillable discard the instance.</div>
+
+<h3>Pre-instancing</h3>
+<p>Pre-build the expected number of participants plus a 15% buffer, starting <b>D−1 09:30</b> in <code>EventTimeZone</code>. Instances that fail the Prepare Helix workspace action end automatically and are not assigned.</p>
+
+<h2 id="hydration">4. Part 1: Hydration</h2>
+<h3>4.0 Pre-flight check (step 1 of the action)</h3>
+<p>Runs first and writes nothing. Signs in with the cloud credential and checks, grouped by what needs them, every Microsoft Graph application permission used by hydration, readiness, scoring and TAP; that the learner exists and is licensed; that at least 6 other licensed users have mailboxes for the Helix organisers; and that <code>EventDate</code> and <code>EventTimeZone</code> are set. If anything is missing, the lab ends with one readable list. The hydrate script repeats the permission check as a safety net.</p>
+
+<h3>4.1 Hydrate (step 2)</h3>
+<table>
+  <tr><th>#</th><th>Phase</th><th>What it does</th></tr>
+  <tr><td>1</td><td>Credential block</td><td>Three lines: tenant ID, client ID and secret from <code>@lab.CloudCredential(…)</code>; learner = the launch's Office 365 admin (published as <code>@lab.Variable(LearnerUpn)</code>). The secret reaches the kit through an environment variable, never the command line.</td></tr>
+  <tr><td>2</td><td>Time window</td><td>Computes D from <code>EventDate</code> and <code>EventTimeZone</code>. Before D−1 09:30 or after D: stops with "outside hydration window" and writes nothing.</td></tr>
+  <tr><td>3</td><td>Pre-flight</td><td>Signs in; reads the permissions in the token and lists any missing (<code>User.ReadWrite.All</code>, <code>Mail.ReadWrite</code>, <code>Calendars.ReadWrite</code>, <code>Files.ReadWrite.All</code>, <code>Teamwork.Migrate.All</code>, <code>Group.ReadWrite.All</code>, <code>TeamMember.ReadWrite.All</code>, <code>MailboxSettings.ReadWrite</code>); confirms the learner exists with E7 and Copilot licences; discovers the licensed fictional users (at least 6 needed).</td></tr>
+  <tr><td>4</td><td>Data pack</td><td>Loads the Helix data pack embedded in <code>Hydrate.ps1</code> on the ISO.</td></tr>
+  <tr><td>5</td><td>Personas</td><td>Maps the 6 Helix meeting organisers onto discovered licensed users (display name, title, department, manager, photo); creates the rest of the Helix cast as unlicensed accounts, reusing existing ones. Never assumes specific user names.</td></tr>
+  <tr><td>6</td><td>Learner profile</td><td>Time zone and locale; bounded wait until the learner's mailbox and OneDrive exist.</td></tr>
+  <tr><td>7</td><td>Teams</td><td>Migration-mode team and channel, backdated posts (D−3 … D−1), complete migration, learner as owner, personas as members.</td></tr>
+  <tr><td>8</td><td>Channel files</td><td>Uploads the 8 Helix files (launch plan, spec, pricing, sync notes, competitor PDFs).</td></tr>
+  <tr><td>9</td><td>Mail</td><td>Backdated, threaded, received (not draft), unread messages, using the same MAPI properties as the current engine.</td></tr>
+  <tr><td>10</td><td>Calendar</td><td>Organisers create the Helix meetings, the learner accepts them, and the leftover invitation messages are removed.</td></tr>
+  <tr><td>11</td><td>Finish</td><td><code>Set-LabVariable HydrationStatus ok</code> and <code>HydratedAt</code>. No other output.</td></tr>
+</table>
+
+<h3>4.2 Readiness (step 3)</h3>
+<ul>
+  <li>The six day-one items are present: Helix team and posts, mail threads, channel files, accepted meetings, learner licences, learner mailbox ready.</li>
+  <li><b>No scoring check passes</b> on the fresh tenant, so nobody can score without doing the work.</li>
+  <li>Sets <code>ReadinessStatus</code> to <code>ok</code> or the reason; ends the lab on failure.</li>
+</ul>
+
+<h3>4.3 Learner sign-in</h3>
+<p>Learners sign in with each launch's Office 365 admin (<code>AdministrativeUsername</code> / <code>AdministrativePassword</code> in Lab Access) and set up Microsoft Authenticator on first sign-in. The Learner step makes sure the admin has a licence that includes Copilot. Cowork being enabled and Copilot credits must come with Skillable's tenant.</p>
+
+<h3>4.4 Rules for every hydration script</h3>
+<ul>
+  <li><b>Safe to re-run:</b> each phase checks the tenant before writing ("team already exists?"), so a retry finishes the job without duplicates.</li>
+  <li><b>Throttling:</b> every Graph call retries on 429/503 and honours <code>Retry-After</code>.</li>
+  <li><b>Seed rule kept:</b> no seeded mail, post, event, file name or content contains a scoring phrase (enforced by the data pack build).</li>
+  <li><b>Quiet:</b> no data written to output, per Skillable guidance; results go into lab variables.</li>
+  <li><b>Data pack:</b> the 240 KB pack is embedded in <code>Hydrate.ps1</code> on the ISO; nothing is hosted or downloaded.</li>
+  <li><b>Expected time:</b> 10–15 minutes per tenant; measured in the pilot.</li>
+</ul>
+
+<h2 id="scoring">5. Part 2: Scoring</h2>
+<h3>5.1 Five scored Activities, 12 check scripts</h3>
+<p>One automated Activity at the end of each milestone page in the lab guide. Each Activity holds one script per scorecard check, with that check's points as the script's score value.</p>
+<table>
+  <tr><th>Activity</th><th>Check scripts (points)</th><th>Total</th></tr>
+  <tr><td><b>Check M1</b>: Master the delegation controls</td><td>drafts-saved (8) · focus-block-approved (7) · focus-block-always-allow (7) · third-block-cancelled (10)</td><td>32</td></tr>
+  <tr><td><b>Check M2</b>: Build the readiness pack</td><td>risk-register-columns (10) · unconfirmed-marked (7)</td><td>17</td></tr>
+  <tr><td><b>Check M3</b>: Capture your reporting standard as a skill</td><td>skill-saved (12) · status-report-produced (10)</td><td>22</td></tr>
+  <tr><td><b>Check M4</b>: Schedule the daily launch briefing</td><td>briefing-email-received (15)</td><td>15</td></tr>
+  <tr><td><b>Check M5</b> (optional): Combine skills into a toolkit</td><td>meeting-prep-skill (5) · companion-template (4) · skill-inventory (5)</td><td>14</td></tr>
+  <tr><td colspan="2"><b>Lab passing score</b></td><td><b>70 / 100</b></td></tr>
+</table>
+
+<h3>5.2 Activity settings</h3>
+<table>
+  <tr><th>Setting</th><th>Value</th></tr>
+  <tr><td>On-Demand Evaluation</td><td>On, button text <b>Check my work</b></td></tr>
+  <tr><td>Display Scripts as Task List</td><td>On: each check shows as a box that turns green or red</td></tr>
+  <tr><td>Allow retries</td><td>On: participants fix and re-check as often as they like <span class="tag verify">verify attempt limits</span></td></tr>
+  <tr><td>Incorrect feedback / message</td><td>The check's hint from <code>scorecard.json</code>, e.g. "Owners not named in a source must read UNCONFIRMED (M2-10)."</td></tr>
+  <tr><td>Show Output To User</td><td>On only if <code>Set-ActivityResult -Message</code> is unsupported <span class="tag verify">verify</span></td></tr>
+</table>
+
+<h3>5.3 Structure of each check script</h3>
+<pre><code># 1. Credential block (3 lines, filled by the build step)
+# 2. Shared helper block: token, Graph GET with retry, mail / calendar / OneDrive readers,
+#    Office text extraction (.docx .xlsx .pptx are zip files: open, strip XML tags)
+# 3. The check (one case ported from scoring.py), e.g. drive_file_contains "Source evidence"
+# 4. Result
+Set-ActivityResult -Correct                       # or -Incorrect
+# (hint shown through the activity's feedback text, or -Message if supported)</code></pre>
+
+<h3>5.4 Check types (ported from <code>scoring.py</code>)</h3>
+<table>
+  <tr><th>Type</th><th>Reads</th><th>Used by</th></tr>
+  <tr><td><code>mail_contains</code></td><td>Drafts, Sent Items, Inbox message bodies</td><td>drafts-saved</td></tr>
+  <tr><td><code>mail_subject</code></td><td>Inbox subjects</td><td>briefing-email-received</td></tr>
+  <tr><td><code>event_exists</code> / <code>event_absent</code></td><td>Calendar view D−1 … D+14</td><td>focus blocks, third-block-cancelled</td></tr>
+  <tr><td><code>drive_item_name</code></td><td>OneDrive item names</td><td>skills, status report, template, inventory</td></tr>
+  <tr><td><code>drive_file_contains</code></td><td>Text inside OneDrive files (newest 60, ≤ 15 MB)</td><td>risk-register-columns, unconfirmed-marked</td></tr>
+</table>
+<p class="muted">Checks read the learner's data directly through Graph, not through search, so results don't wait for indexing.</p>
+
+<h3>5.5 End-of-lab score</h3>
+<p>When the lab is submitted or ends, Skillable's platform scoring totals the five Activities. That total is the participant's official result in Skillable's reports. <span class="tag verify">verify</span> that platform scoring evaluates Activities the participant never clicked; if not, the lab guide's last page asks them to click <b>Check my work</b> on every milestone before submitting.</p>
+
+<h2 id="learner">6. What participants see and click</h2>
+<table>
+  <tr><th>Moment</th><th>Where</th><th>What they see</th></tr>
+  <tr><td>Launch</td><td>Lab guide, first page</td><td>Their lab account and Temporary Access Pass to sign in to Microsoft 365, and a ready Helix workspace (mail, Teams, files, meetings)</td></tr>
+  <tr><td>After each milestone</td><td>Bottom of the milestone page in the lab guide</td><td>A <b>Check my work</b> button; the checks for that milestone turn green or red, with a hint on anything missing</td></tr>
+  <tr><td>Any time</td><td>Same button</td><td>Re-check after fixing something; the score updates</td></tr>
+  <tr><td>End of lab</td><td>Skillable results page</td><td>Total score out of 100 and pass (70) or not</td></tr>
+</table>
+
+<div class="mock">
+  <div class="bar">Check M2: Build the readiness pack</div>
+  <div class="row"><span class="ok">&#10003;</span> Risk register has a Source evidence column <span style="margin-left:auto" class="hint">10 pts</span></div>
+  <div class="row"><span class="no">&#10007;</span> <div>Unconfirmed owners marked<div class="hint">Owners not named in a source must read UNCONFIRMED (M2-10).</div></div><span style="margin-left:auto" class="hint">0 / 7 pts</span></div>
+  <div class="row"><span class="btn">Check my work</span></div>
+</div>
+<p class="muted">Illustration of the Activity task list; the exact look follows Skillable's lab client.</p>
+
+<h2 id="organisers">7. What organisers see</h2>
+<ul>
+  <li><b>Skillable reports:</b> each participant's activity results and total score, with export, from Skillable Studio.</li>
+  <li><b>Live progress during the event:</b> Skillable's lab instance monitoring (which Activities each participant has passed).</li>
+  <li><b>Disputes:</b> an organiser opens the participant's lab instance in Skillable and re-runs the Activity, or adjusts the score in Skillable.</li>
+</ul>
+<div class="callout">Option 1 has no separate leaderboard or scorecard website. If a live cross-participant leaderboard is wanted later, the check scripts can additionally send results to a small results service; the scripts change only by a few reporting lines.</div>
+
+<h2 id="repo">8. Code layout and build</h2>
+<p>Repository <b>Skillable-Lifecycle</b>:</p>
+<table>
+  <tr><th>Path</th><th>Contents</th></tr>
+  <tr><td><code>src/common/</code></td><td>Graph client (token, retries, paging, permission check), timeline, text/Office/PDF handling, data pack loader</td></tr>
+  <tr><td><code>src/lifecycle/</code></td><td><code>Preflight.ps1</code>, <code>Hydrate.ps1</code>, <code>Readiness.ps1</code>, <code>Tap.ps1</code>, <code>Launcher.ps1</code> (the VM life cycle action)</td></tr>
+  <tr><td><code>src/scoring/</code></td><td><code>Checks.ps1</code> (the 5 check types and scorecard), <code>Activity.ps1</code> (one check per Activity script)</td></tr>
+  <tr><td><code>config/</code>, <code>datapack/</code></td><td><code>scorecard.json</code>, <code>readiness.json</code>, and the Helix data pack as a gzipped JSON bundle</td></tr>
+  <tr><td><code>build/Build.ps1</code></td><td>Builds the <code>skillable/</code> package (ISO, life cycle script, activity scripts, lab instructions), with the cloud credential name as a parameter</td></tr>
+  <tr><td><code>tools/</code></td><td><code>Convert-DataPack.ps1</code> (Cowork-Lab zip to bundle), <code>Invoke-Local.ps1</code> (run a built script against the test tenant)</td></tr>
+  <tr><td><code>tests/</code></td><td>Pester: unit, end-to-end against an in-memory tenant, and the built <code>skillable/</code> package</td></tr>
+  <tr><td><code>docs/</code></td><td>Lab profile set-up, tenant requirements, this plan</td></tr>
+</table>
+<pre><code>./build/Build.ps1 -CloudCredential WWLM365E7 -Iso
+# -> skillable/HelixKit-&lt;version&gt;.iso, skillable/lifecycle/Prepare-Helix-Workspace.ps1,
+#    skillable/activities/M1..M5/*.ps1, skillable/Lab-Instructions.md</code></pre>
+
+<h2 id="testing">9. Testing</h2>
+<table>
+  <tr><th>Stage</th><th>Where</th><th>Pass when</th></tr>
+  <tr><td>Unit tests</td><td>Locally (Pester, recorded Graph responses)</td><td>Each phase and check behaves correctly, including re-runs and the "outside hydration window" stop</td></tr>
+  <tr><td>Dev tenant</td><td>9e9d tenant, test app with the same permissions; scripts run by hand</td><td>Hydrate runs twice without duplicates; readiness passes; a hand-done learner run scores 100; an untouched account scores at most 10 (the baseline: <code>third-block-cancelled</code> passes when no such event exists)</td></tr>
+  <tr><td>Skillable dev lab profile</td><td>One pre-built instance</td><td>All life cycle actions green; hydration time and indexing delay measured; credential name confirmed</td></tr>
+  <tr><td>Pilot</td><td>Full learner run M1–M5</td><td>Copilot finds the seeded content at the start; every Activity scores as expected; Skillable's final score matches</td></tr>
+  <tr><td>Scale rehearsal</td><td>20+ pre-built instances</td><td>All hydrate inside the window and pass readiness</td></tr>
+</table>
+
+<h2 id="runsheet">10. Event run sheet</h2>
+<table>
+  <tr><th>When</th><th>Who</th><th>What</th></tr>
+  <tr><td>D−7</td><td>Lab team</td><td>Final scripts built and pasted into the production lab profile; dev pilot passed</td></tr>
+  <tr><td>D−2</td><td>Lab team + Skillable</td><td><code>$EventDate</code>, <code>$EventTimeZone</code> set in the life cycle script; one test instance built and checked</td></tr>
+  <tr><td>D−1 from 09:30</td><td>Skillable</td><td>Pre-build N + 15% instances; failed ones end and are rebuilt</td></tr>
+  <tr><td>D−1 afternoon</td><td>Proctor</td><td>Spot-check one instance: Copilot answers the seeded fact questions</td></tr>
+  <tr><td>D0</td><td>Participants</td><td>Launch, sign in with the Office 365 admin (Authenticator set-up on first sign-in), work through M1–M5, click <b>Check my work</b> after each milestone, submit</td></tr>
+  <tr><td>D0</td><td>Organisers</td><td>Watch progress in Skillable; handle disputes</td></tr>
+  <tr><td>D0 end</td><td>Organisers</td><td>Export results from Skillable; Skillable tears down tenants</td></tr>
+</table>
+
+<h2 id="owners">11. Responsibilities and open questions</h2>
+<table>
+  <tr><th>Item</th><th>Owner</th></tr>
+  <tr><td>Hydration, readiness, learner and check scripts; build script; tests; lab guide snippets</td><td>Lab team</td></tr>
+  <tr><td>Lab profile configuration, cloud credential, pre-build schedule, tenant pool</td><td>Skillable / lab profile owner</td></tr>
+</table>
+<p><b>Open questions</b> (answer from Skillable, or measure in the dev lab profile):</p>
+<ul class="check">
+  <li><b>Does First Displayable run while a pre-instance is built?</b> VM scripts cannot use Post-Build. If First Displayable only fires when the learner opens the lab, each learner waits 10–20 minutes for hydration.</li>
+  <li>Maximum life cycle action timeout (hydration needs 10–15 min, planned 45)</li>
+  <li>Can a VM life cycle script call <code>Set-LabVariable</code>? (the status line stays blank otherwise; the action's result is unaffected)</li>
+  <li>Is <code>Set-ActivityResult -Message</code> supported, or should hints come from feedback text / script output?</li>
+  <li>Attempt limits on Activities with retries enabled</li>
+  <li>Does platform scoring at submit evaluate Activities the participant never clicked?</li>
+  <li>Name of the cloud credential in the production lab profile (readable in its Cloud tab)</li>
+  <li>Does the 9e9d tenant match the participant tenant template? (unknown; pre-flight catches gaps)</li>
+</ul>
+
+<h2 id="risks">12. Risks</h2>
+<table>
+  <tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr>
+  <tr><td>Copilot cannot yet find freshly seeded content</td><td>M1 "sourced catch-up" fails</td><td>Pre-build from D−1 gives hours for indexing; measure in pilot; proctor spot-check</td></tr>
+  <tr><td>Participant tenants differ from 9e9d</td><td>Hydration fails on event tenants</td><td>Pre-flight and runtime user discovery; first pilot instance fails clearly; requirements list shared with Skillable</td></tr>
+  <tr><td>Hydration exceeds the timeout</td><td>Instances end at build</td><td>Measure in pilot; split hydrate into two blocking actions if needed</td></tr>
+  <tr><td>Learner mailbox or OneDrive not ready at build</td><td>Mail or file writes fail</td><td>Bounded waits; readiness check ends broken instances</td></tr>
+  <tr><td>Pre-build started before D−1 09:30</td><td>Teams import rejects posts</td><td>Script refuses outside the window and ends the instance; run sheet schedules the pre-build</td></tr>
+  <tr><td>Check scripts drift apart</td><td>Inconsistent scoring</td><td>All 12 generated by <code>build.ps1</code> from one helper block and <code>scorecard.json</code></td></tr>
+</table>
+
+<footer>
+  Cowork Lab (COWORK-T1) · Skillable implementation plan · Sources: Skillable Studio documentation (Life Cycle Actions, Automating Activities, Scoring) and the Cowork-Lab repository (glc_hydrate engine, scorecard.json, operator guide).
+</footer>
+
+</div>
+</body>
+</html>

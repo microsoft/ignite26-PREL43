@@ -1,0 +1,269 @@
+COWORK LAB - SKILLABLE SET-UP AND TEST STEPS
+=============================================
+Lab profile: work on a TEST COPY (e.g. PREL 43), not the live one.
+All files below are in the  skillable\  folder.
+
+  skillable\HelixKit-1.0.4.iso                       PART A  (upload)
+  skillable\lifecycle\Prepare-Helix-Workspace.ps1    PART B  (paste)
+  skillable\Lab-Instructions.md                      PART C  (paste)
+  skillable\activities\M1 ... M5\*.ps1               PART D  (paste)
+
+How it works in one line: the ISO carries the full hydration kit (scripts + Helix data + portable
+PowerShell 7). One small life cycle script inside the lab VM finds the ISO and runs it. The 12
+"Check my work" scripts run in Skillable's cloud and read the learner's Microsoft 365.
+
+Nothing needs hosting anywhere. No Azure. No download links.
+
+
+PART A - REMOVABLE MEDIA (the ISO)                                         ~10 min, once
+-----------------------------------------------------------------------------------------
+A1. Upload skillable\HelixKit-1.0.4.iso (about 107 MB) to the lab's media storage, e.g.
+    SMB2\Microsoft Events\Ignite2026\PREL43-Media\HelixKit-1.0.4.iso
+    Check it is the right file (PowerShell):  Get-FileHash .\HelixKit-1.0.4.iso
+      2D6150B2CB9AC50332B83A7CB824F04220C3CD258E2AC68E0DDB219139CDDDB0
+    NEW ISO RELEASED? Upload it under its NEW name, change the Image Path in A2 to it, and
+    re-paste the life cycle script (B3). The script checks the version and stops if the VM
+    has a different ISO, so an old copy can never run by mistake.
+A2. Edit Lab Profile > Media tab > Add Removable Media:
+      Name: HelixKit Media   Media Type: Optical   Image Path: the path above
+A3. Save.
+A4. Virtual Machines tab > Win11-Pro-Base > DVD Drive:  HelixKit Media.  Save.
+    (Adding it under Media only makes it available; DVD Drive inserts it at start.)
+    Check: in a launched lab, File Explorer shows a drive labelled HELIXKIT with a
+    HelixKit folder.
+
+
+PART B - LIFE CYCLE ACTION (hydration)                                     ~5 min
+-----------------------------------------------------------------------------------------
+B1. Edit Lab Profile > Life Cycle tab.
+B2. REMOVE any hydration actions added in earlier tests (1-Preflight, 2-TapPolicy, 3-Hydrate,
+    4-Readiness, 5-TapIssue cloud scripts).
+    Leave the lab's existing TAP action as it is (it is for the Azure Portal account; our
+    lab does not use a TAP).
+B3. Add Life Cycle Action:
+      Name:           Prepare Helix workspace
+      Action:         Execute Script in Virtual Machine
+      Machine:        the Windows lab VM
+      Event:          First Displayable   (VM scripts cannot use Post-Build)
+      Language:       PowerShell
+      Blocking:       TICK it (it is unticked by default)
+      Delay:          0
+      Timeout:        45 minutes (default 10 is too short)
+      Retries:        0
+      Error action:   End lab for events. While testing "Log" is fine.
+      Enabled:        ticked
+      Script:         Start from Scratch > PowerShell > open
+                      skillable\lifecycle\Prepare-Helix-Workspace.ps1 in Notepad,
+                      Ctrl+A, Ctrl+C, paste.
+    What it does: finds the HELIXKIT DVD (waits up to 2 min), starts PowerShell 7, waits for
+    internet (up to 5 min), then Grant -> Learner -> Preflight -> Hydrate -> Readiness.
+    Total about 6-7 minutes on a fresh tenant (longer if the admin needed a licence).
+    Grant: if the cloud credential's app (ScoringApp) is missing Graph permissions in this
+    launch's tenant, it signs in as that tenant's admin and grants them, then waits until
+    they are active (usually 1-5 min). If nothing is missing it does nothing.
+    Learner: the learner is this launch's Office 365 admin (Administrative Username).
+    If the admin has no licence with Copilot, it gets one: a free seat if there is one,
+    otherwise the seat of a spare user (6 users are always kept for the Helix meetings).
+    Sets lab variable LearnerUpn; the Check my work scripts use it.
+    Cowork itself (switched on for the tenant, Copilot credits) must come with the tenant
+    from Skillable - the scripts cannot switch it on.
+B3b. Admin sign-in for Grant - token names (lines 21-24 of the script):
+      $TenantName    = '@lab.CloudCredential(WWLM365E7).TenantName'
+      $AdminUser     = '@lab.CloudCredential(WWLM365E7).AdministrativeUsername'
+      $AdminPassword = '@lab.CloudCredential(WWLM365E7).AdministrativePassword'
+    They are the credential's Lab Access fields "Administrative Username" / "Administrative
+    Password" without spaces (like "Tenant Name" -> TenantName, which works). The log prints
+    "Tokens filled: TenantName=True, AdministrativeUsername=True, AdministrativePassword=True".
+    A False means Skillable did not recognise that name: check the field name in Studio
+    (Cloud tab > credential) and change it here. If the username is not filled the script
+    uses admin@<this launch's tenant>.
+    The admin account must NOT require MFA (the script signs in without a person).
+B4. Event date: line 12 of the script reads   $EventDate = 'YYYY-MM-DD'
+      - For TESTING leave it: the script uses today.
+      - For an EVENT set the event day, e.g.  $EventDate = '2026-11-18'
+        and pre-build no earlier than 09:30 the day before (India time).
+B5. Save.
+
+The lab VM needs internet access to login.microsoftonline.com and graph.microsoft.com
+(normal for this lab; it already opens Microsoft 365 in Edge).
+
+
+PART C - LAB INSTRUCTIONS                                                  ~3 min
+-----------------------------------------------------------------------------------------
+C1. Edit Instructions. Ctrl+A, Delete.
+C2. Open skillable\Lab-Instructions.md in Notepad, Ctrl+A, Ctrl+C, paste. Save.
+
+What is in it:
+  - Getting started starts with a status line: Pre-flight / Hydration / Readiness = ok
+    (test build only: delete that NOTE block before the event).
+  - Simple English, short steps and bullets.
+  - Sign-in step shows the Office 365 admin Username and Password from Lab Access, and
+    says to set up Microsoft Authenticator if asked (one time).
+    IMPORTANT: learners sign in with the Office 365 admin, NOT the Azure Portal account.
+  - Each milestone ends with "Check your work" and  @lab.Activity(CheckM1) ... (CheckM5).
+
+
+PART D - SCORED ACTIVITIES (Check my work)                                 ~20 min
+-----------------------------------------------------------------------------------------
+Instructions editor > Activities tab:
+  - Scoring Mode: Activity Scoring.   Passing Score: 70.
+  - If CheckM1 etc. already exist from the last test: open each script and REPLACE the text
+    with the new file (the new ones are smaller and fixed). Settings below stay the same.
+
+Create 5 activities: New Automated (Script) Activity. Name/ID exactly CheckM1 ... CheckM5
+(must match the @lab.Activity(...) tokens in the instructions).
+
+Every ACTIVITY (top of the "New Automated (Script) Activity" dialog):
+  Name / Replacement Token Alias:   CheckM1 (both the same; CheckM2 ... CheckM5 for the others)
+  Show results in reports:          On
+  Scored:                           On
+  Display scripts as task list:     On     (each check shows as its own line, green/red)
+  Evaluation button placement:      Above task list (appears once task list is on; either is fine)
+  On-demand evaluation:             On     (gives the learner the button; greyed but ticked
+                                            once task list is on - that is fine)
+  Custom evaluation button text:    On  ->  Check My Work
+  Allow retries:                    On
+  Maximum attempts:                 Off    (learners may check as often as they like)
+  Required for submission:          Off
+  Blocks page navigation...:        Off
+  Correct / Incorrect Answer Feedback: Done. / Not found yet - read the hint, fix it, and check
+                                    again.  (These boxes disappear once task list is on; then
+                                    feedback is per script, see Outcomes below. Optional: the
+                                    scripts already print their own "Done: ..." or hint.)
+  Then "Add Script" once per script listed below.
+
+Every SCRIPT inside an activity (Script > Settings):
+  Target:               Cloud Subscription  (Skillable's cloud platform)
+  Language:             PowerShell
+  Version:              PS 7.1.3 | Az 6.0.0 (any PS 7.x)   <-- NOT "PS 5.1 | AzureRM 6.8.1"
+  Script enabled:       On
+  Score value:          as listed below
+  Retries:              0
+  Show output to user:  On
+  Task name:            Settings tab > scroll down > Task list properties > Task Name
+                        (as listed below; required)
+  Outcomes tab:         optional - Correct: Done.  Incorrect: Not found yet - read the hint,
+                        fix it, and check again.
+  Script:               open the .ps1 in Notepad, Ctrl+A, Ctrl+C, paste
+
+CheckM1   (32 points)
+  activities\M1\1-drafts-saved.ps1               8   Task: Three drafts saved by Cowork
+  activities\M1\2-focus-block-approved.ps1       7   Task: Focus block approved
+  activities\M1\3-focus-block-always-allow.ps1   7   Task: Focus block added with Always allow
+  activities\M1\4-third-block-cancelled.ps1     10   Task: Third focus block not created
+CheckM2   (17 points)
+  activities\M2\1-risk-register-columns.ps1     10   Task: Risk register has the right columns
+  activities\M2\2-unconfirmed-marked.ps1         7   Task: Unconfirmed figures marked
+CheckM3   (22 points)
+  activities\M3\1-skill-saved.ps1               12   Task: Status report skill saved
+  activities\M3\2-status-report-produced.ps1    10   Task: Status report produced with the skill
+CheckM4   (15 points)
+  activities\M4\1-briefing-email-received.ps1   15   Task: Daily briefing email received
+CheckM5   (14 points, optional milestone)
+  activities\M5\1-meeting-prep-skill.ps1         5   Task: Meeting prep skill saved
+  activities\M5\2-companion-template.ps1         4   Task: Companion template created
+  activities\M5\3-skill-inventory.ps1            5   Task: Skill inventory produced
+
+Short on time: create CheckM1 only; the other tokens just show as text.
+Save the instructions and the lab profile.
+
+
+PART E - LAUNCH AND TEST                                                   ~30-45 min
+-----------------------------------------------------------------------------------------
+E1. Launch a NEW test lab (no pre-build needed for a test). Any change to the life cycle
+    action, activities or ISO only applies to labs launched AFTER the change.
+E2. Wait: "Prepare Helix workspace" takes about 6-10 minutes. The lab shows as starting.
+E3. When the lab opens, Getting started shows:
+        Pre-flight: ok   Hydration: ok   Readiness: ok
+    and the sign-in step shows the Office 365 admin Username and Password.
+    (If the three values are blank but the lab opened, the action still succeeded: lab
+    variables may not be settable from VM scripts. Check the life cycle log - see F1.)
+E4. In the VM, open Edge > https://m365.cloud.microsoft
+    Sign in with the Office 365 admin Username and Password. Set up Microsoft
+    Authenticator if asked. Then open Copilot and check Cowork is in the left pane.
+E5. Check the Helix data is there:
+      Outlook: ~35 Helix messages, meetings this week in the calendar
+      Teams:   team with the "Launch - Helix" channel, posts and 8 files
+E6. All-fail test: go to Milestone 1 > Check your work > Check my work.
+    Expected: within ~30 seconds, each item red with its hint,
+    EXCEPT "Third focus block not created" which is green (nothing was created yet).
+    That is the expected baseline: 10 of 100 points.
+E7. Optional pass test: do step 1.3 (three drafts) in Cowork, then Check my work again:
+    "Three drafts saved by Cowork" turns green.
+
+
+PART F - TROUBLESHOOTING
+-----------------------------------------------------------------------------------------
+F1. Where is the hydration log?  Lab instance details (Studio > lab instance / Lab Console
+    > Life cycle actions) > "Prepare Helix workspace" > output. It prints each step:
+       HelixKit found at D:\HelixKit
+       PowerShell 7: ...
+       Network ready (waited about N s).
+       ----- Grant -----   "All Microsoft Graph permissions already granted." or
+                           "Granted Mail.ReadWrite to ScoringApp" ... "Permissions active after N s."
+       ----- Learner -----  "Learner: <upn> (chosen automatically from N licensed users)"
+       ----- Preflight -----  ----- Hydrate -----  ----- Readiness -----
+
+       Helix workspace ready.
+
+  Message                                         Fix
+  ----------------------------------------------  --------------------------------------------
+  HelixKit media not found                        PART A4: ISO not inserted in the VM at start (the
+                                                  error lists the drives the VM can see)
+  The VM has HelixKit X but this script needs Y   Image Path still points at an old ISO: upload
+                                                  HelixKit-Y.iso, change Image Path, new lab
+  No internet from the VM after 5 minutes         Networks tab: the VM's NIC must be on the
+                                                  Internet network with outbound access
+  "parameter cannot be found ... StatusCodeVariable"  OLD ISO (1.0.0): use HelixKit-1.0.4.iso
+  Learner failed: No licence ... includes Copilot The tenant has no Copilot licences: Skillable
+  Learner failed: No free ... seat ... need 6     Too few licensed users to spare one for the
+                                                  admin: Skillable needs to add Copilot seats
+  Cowork missing, or asks for credits/licence     Cowork or credits are not set up in the tenant:
+                                                  Skillable (the scripts can't switch it on)
+  Check my work: "Your lab isn't ready yet"       LearnerUpn was never set: the life cycle action
+                                                  failed or did not run
+  PowerShell 7 is not installed and the media...  Wrong ISO; re-upload skillable\HelixKit-<version>.iso
+  Grant failed: ... no tenant admin sign-in is    The admin tokens (B3b) were not filled: fix
+    configured                                    .Username / .Password to Studio's names
+  Grant failed: ... requires MFA                  The tenant admin has MFA: Grant cannot work;
+                                                  ask Skillable to add the permissions (below)
+  Grant failed: ... wrong admin username or       Token names point at the wrong property, or
+    password / user does not exist                the admin is not admin@<tenant>: fix B3b
+  Grant failed: ... blocked by Conditional Access Same as MFA: ask Skillable
+  Grant failed: ... still lacks X after 10 min    Microsoft was slow; relaunch
+  Pre-flight failed ... missing permission X      Grant could not add X; ask Skillable to add it
+                                                  to the WWLM365E7 credential:
+                                                  Mail.ReadWrite, Calendars.ReadWrite,
+                                                  MailboxSettings.ReadWrite, Teamwork.Migrate.All,
+                                                  ChannelMessage.Read.All
+  Pre-flight failed ... learner ... not found     The AdministrativeUsername token was not filled
+                                                  (B3b) and admin@<tenant> does not exist
+  Outside the hydration window                    $EventDate is set to a future/past day. For a test
+                                                  set it back to 'YYYY-MM-DD'
+  Hydration failed during '<phase>'               Send us the last 20 lines of the log
+  Lab variable values blank                       See E3; not an error by itself
+
+F2. Check my work stays red with "We couldn't check this right now" + Details:
+      - Version must be PowerShell 7.x (PART D).
+      - Details text tells the Graph error; send it to us.
+F2b. "The specified script was not found" under each task: the activity was added while
+    that lab was running. End it and launch a new lab.
+F3. "argument list too long": an OLD script is still pasted. Replace it with the file from
+    skillable\activities (each is ~16-20 KB).
+F4. Everything red, even "Third focus block": the learner used the Azure Portal account, or
+    the hydration did not run. Check E3 and sign in with the Office 365 admin.
+
+
+OPTIONAL - RUN THE HYDRATION FROM A LAPTOP (fallback only)
+-----------------------------------------------------------------------------------------
+Needs PowerShell 7 and the tenant's cloud credential (tenant id, client id, secret).
+  Open PowerShell 7:  pwsh -ExecutionPolicy Bypass
+  cd <this folder>\skillable\media\HelixKit
+  $env:HELIXKIT_CLIENT_SECRET = '<client secret>'
+  $p = @{ TenantId='<tenant id>'; ClientId='<client id>'; LearnerUpn='<Office 365 Administrative Username>';
+          EventDate=(Get-Date -Format yyyy-MM-dd); EventTimeZone='India Standard Time' }
+  & .\Preflight.ps1 @p
+  & .\Hydrate.ps1 @p
+  & .\Readiness.ps1 @p
+  & .\Score-All.ps1 @p        # whole scorecard as JSON
+  Remove-Item Env:\HELIXKIT_CLIENT_SECRET
