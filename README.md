@@ -32,7 +32,7 @@ Fill in the sections below yourself, then:
 
 # [Microsoft Ignite 2026](https://ignite.microsoft.com)
 
-## 🔥PREL43: Copilot Cowork Consumption Accelerator Lab
+## 🔥PREL43: From AI Curiosity to Practical Capability
 ### Session description
 
 A hands-on, gamified skilling experience across Copilot Chat, Cowork, and Code, designed to turn Ignite momentum into practical AI capability for our partner ecosystem.
