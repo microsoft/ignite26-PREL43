@@ -35,7 +35,7 @@ Fill in the sections below yourself, then:
 ## 🔥PREL43: Copilot Cowork Consumption Accelerator Lab
 ### Session description
 
-Add your session description here. Keep it concise — 2-3 sentences about what attendees will learn and why it matters.
+A hands-on, gamified skilling experience across Copilot Chat, Cowork, and Code, designed to turn Ignite momentum into practical AI capability for our partner ecosystem.
 
 ### 🚀 Getting started
 
