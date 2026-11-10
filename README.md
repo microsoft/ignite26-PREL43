@@ -1,72 +1,122 @@
-# Cowork Lab: hydration and scoring for Skillable
+## Before you're done
 
-Hydration and scoring for the Copilot Cowork lab **Launch Command Center (COWORK-T1)**. Everything runs
-inside Skillable; nothing is deployed in Azure. Every participant gets a fresh Microsoft 365 tenant.
+This repo has been created for your Microsoft Ignite 2026 session. Here's how to get it ready.
 
-| Part | Where it runs | What it does |
-|---|---|---|
-| **Hydration** | One life cycle action, *Execute Script in Virtual Machine*, at First Displayable. It runs the HelixKit scripts from an ISO attached to the lab VM | Pre-flight (Graph permissions, learner, licences), then writes the Helix launch story into the learner's Microsoft 365 (people, Teams channel, files, mail, calendar), then a readiness check |
-| **Scoring** | Five scored Activities, *Check my work* at the end of each milestone (12 small cloud scripts) | Reads the learner's mail, calendar and OneDrive; each item turns green, or red with a hint. 100 points, pass mark 70 |
+**Easiest path — use the agent (recommended):**
 
-## Start here
+- Open GitHub Copilot Chat and say `help me initialize repo`. The agent will walk you through getting the README populated.
+- When you're ready to publish, say `help me finalize repo`. The agent will clean up unused folders, validate everything, and remove this "Before you're done" section and other extra stuff that attendees don't need to see.
+- Curious how it works? Read the [agent workflow](.github/AGENT-WORKFLOW.md).
 
-**Setting up or testing a lab profile? Open [STEPS.txt](STEPS.txt)** and follow it top to bottom. Everything it
-asks you to paste or upload is in [skillable/](skillable):
+**Doing it manually?**
 
+Fill in the sections below yourself, then:
+
+- Delete any placeholder folders you don't need (`data/`, `infra/`, etc.)
+- Delete this "Before you're done" section
+- Delete `.github/agents/`, `.github/tests/`, `.github/copilot-instructions.md`, and `.github/AGENT-WORKFLOW.md` — these are template tooling, not part of your published repo
+
+**Folder conventions:**
+
+- Attendee step-by-step guidance goes in `instructions/`. If you use MkDocs or a docs site instead, put it in `docs/` and link to it from this README.
+- Reference material and background reading go in `docs/`.
+- You can add a `.devcontainer/` folder if needed.
+
+---
+
+<a name="start-building"></a>
+
+<p align="center">
+<img src="img/banner-ignite-26.png" alt="Microsoft Ignite 2026" width="100%"/>
+</p>
+
+# [Microsoft Ignite 2026](https://ignite.microsoft.com)
+
+## 🔥PREL43: From AI Curiosity to Practical Capability
+### Session description
+
+A hands-on, gamified skilling experience across Copilot Chat, Cowork, and Code, designed to turn Ignite momentum into practical AI capability for our partner ecosystem.
+
+### 🚀 Getting started
+
+#### In a guided session
+
+If you're following along during a live session:
+
+1. Step 1
+2. Step 2
+3. Open [`instructions/`](instructions/README.md) when this session includes
+   attendee step-by-step guidance
+
+#### On your own
+
+If you're learning at your own pace:
+
+1. Clone this repository
+2. Set up your environment
+3. Follow the session guidance in [`instructions/`](instructions/README.md), or
+   use the linked docs-site entry point when this repository uses that pattern
+
+### 🎯 Learning outcomes
+
+By the end of this session, you will be able to:
+
+- Outcome 1
+- Outcome 2
+- Outcome 3
+
+### 💻 Technologies used
+
+- Technology 1
+- Technology 2
+- Technology 3
+
+### 📚 Continue your learning
+
+Pick your next step based on your learning style:
+
+| Resource | What you'll get |
+|----------|-----------------|
+| **[Ignite 2026 Next Steps](https://aka.ms/ignite26-next-steps)** | Additional session repos and materials from Microsoft Ignite 2026 |
+| **[Microsoft AI Skills Navigator](https://aka.ms/ignite26-asn)** | Discover AI skills, learning paths, and resources for your next step |
+| **[Microsoft Learn](https://aka.ms/ignite26-learn)** | Official documentation and guided learning paths on these topics |
+| **[Microsoft Foundry Community](https://aka.ms/MicrosoftFoundryDiscord-Ignite26)** | Connect with other learners and experts in our Discord community |
+
+### 🌟 Microsoft Learn MCP Server
+
+<!-- Remove this section if the Microsoft Learn MCP Server is not relevant to the session. -->
+
+The Microsoft Learn MCP Server gives your AI agent direct access to Microsoft's official documentation — grounded, up-to-date answers about the topics in this session.
+
+**GitHub Copilot CLI** — Install with:
+
+```shell
+copilot plugin install microsoftdocs/mcp
 ```
-skillable/
-  HelixKit-1.0.6.iso                          upload as removable media, attach to the lab VM
-  lifecycle/Prepare-Helix-Workspace.ps1       the hydration life cycle action (VM script, First Displayable)
-  lifecycle/Enable-Admin-TAP.ps1              the admin's 48-hour sign-in pass (cloud script, Post-Build)
-  activities/M1 ... M5/*.ps1                  the 12 Check my work scripts (run in the lab VM; no subscription needed)
-  Lab-Instructions.md                         full lab guide: sign-in, status line, Check my work blocks
-  optional/activities-cloud/                  the same 12 checks as cloud scripts (only if the profile has a subscription)
-  optional/TapPolicy.ps1, TapIssue.ps1        only if the lab's own TAP action is ever replaced
-  media/HelixKit/                             what is inside the ISO (for reference)
-```
 
-The package is built for the cloud credential **WWLM365E7**. Learners sign in with each launch's **Office 365 admin** (Administrative Username/Password in Lab Access). The life cycle action makes sure that admin has a Copilot licence and puts the Helix data in its mailbox, calendar and the Launch - Helix team.
+**VS Code** — One-click install:  
+[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_Microsoft_Learn_MCP-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=microsoft-learn&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Flearn.microsoft.com%2Fapi%2Fmcp%22%7D)
 
-## Documents
+For more information, visit the [Learn MCP Server repo](https://aka.ms/learnmcp).
 
-| Document | Use it to |
-|---|---|
-| [STEPS.txt](STEPS.txt) | Configure the lab profile, launch, test, troubleshoot (plain text, open in Notepad) |
-| [docs/RUNBOOK.md](docs/RUNBOOK.md) | Run an event: before, during and after; sign-off checklist |
-| [docs/lab-profile.md](docs/lab-profile.md) | Every Skillable setting in one place |
-| [docs/tenant-requirements.md](docs/tenant-requirements.md) | What each participant tenant must have (checked by pre-flight) |
-| [docs/implementation-plan.html](docs/implementation-plan.html) | The plan, for sharing |
-| [CHANGELOG.md](CHANGELOG.md) | What changed in each version |
+### 👥 Content owners
 
-## For developers
+<!-- TODO: Add yourself as a content owner
+1. Change the src in the image tag to {your github url}.png
+2. Change INSERT NAME HERE to your name
+3. Change the github url in the final href to your url. -->
 
-```
-src/common/        Graph client, timeline, text/Office/PDF handling, data pack loader
-src/lifecycle/     Grant, Credits, Learner, Preflight, Hydrate, Readiness, Launcher (the VM life cycle action),
-                   AdminTap (the admin's TAP action); Tap (optional scripts only)
-src/scoring/       Checks (scorecard check types), Activity (one check per script)
-content/           Lab-Instructions.md (source of the lab guide)
-config/            scorecard.json, readiness.json
-datapack/          helix-datapack-1.0.0.json.gz (240 KB; built into Hydrate.ps1 on the ISO)
-build/Build.ps1    builds skillable/
-tools/             Get-PortablePwsh.ps1, Convert-DataPack.ps1, Invoke-Local.ps1
-tests/             Pester: unit, end-to-end against an in-memory tenant, and the built skillable/ package
-```
+<table>
+<tr>
+    <td align="center"><a href="http://github.com/yourGitHubHandle">
+        <img src="https://github.com/yourGitHubHandle.png" width="100px;" alt="INSERT NAME HERE"/><br />
+        <sub><b>INSERT NAME HERE</b></sub></a><br />
+            <a href="https://github.com/yourGitHubHandle" title="talk">📢</a>
+    </td>
+</tr></table>
 
-Build (PowerShell 7; `-Iso` needs macOS `hdiutil` or Windows `oscdimg`):
+### ⚖️ Trademarks
 
-```powershell
-./tools/Get-PortablePwsh.ps1                       # once: portable PowerShell 7 for the ISO (vendor/)
-./build/Build.ps1 -CloudCredential WWLM365E7 -Iso
-Install-Module Pester -MinimumVersion 5.5 -Scope CurrentUser   # once
-Invoke-Pester ./tests                              # 87 passed
-```
+This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/legal/intellectualproperty/trademarks/usage/general). Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 
-Optional build parameters: `-EventDate yyyy-MM-dd` (otherwise set it in the life cycle script; without one a
-launch uses today), `-EventTimeZone` (default `India Standard Time`), `-LearnerUpn`.
-
-| Change | Do |
-|---|---|
-| New data pack release | `./tools/Convert-DataPack.ps1 -Zip <path>/helix-datapack-<v>.zip` (needs `powershell-yaml`), rebuild, upload the new ISO |
-| Scorecard change | Update `config/scorecard.json`, rebuild, re-paste the affected activity scripts |
-| Lab guide change | Edit `content/Lab-Instructions.md`, rebuild, re-paste |
+Any use of third-party trademarks or logos are subject to those third-party's policies.
