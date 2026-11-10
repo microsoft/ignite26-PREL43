@@ -1,358 +1,136 @@
-# Check M5 / skill-inventory (5 points) - Cowork Lab v1.0.4. Execute in Cloud Platform, PowerShell 7.
+# Check M5 / skill-inventory (5 points) - Cowork Lab v1.0.6.
+# Scored Activity script: Execute in Virtual Machine (Win11-Pro-Base), PowerShell. No cloud subscription needed.
+# Runs the check in the PowerShell 7 that the "Prepare Helix workspace" action installed (works in Windows
+# PowerShell 5.1), then reports Correct or Incorrect to Skillable.
 $ErrorActionPreference = 'Stop'
-$ProgressPreference = 'SilentlyContinue'
 $TenantId     = '@lab.CloudCredential(WWLM365E7).TenantId'
 $ClientId     = '@lab.CloudCredential(WWLM365E7).ClientId'
 $ClientSecret = '@lab.CloudCredential(WWLM365E7).ClientSecret'
 $LearnerUpn   = '@lab.Variable(LearnerUpn)'
-$script:GraphRoot = 'https://graph.microsoft.com/v1.0'
-$script:GraphAuth = $null
-$script:GraphRetryBudgetSeconds = 600   # Check my work scripts lower this so learners never wait long
-class GraphError : System.Exception {
-[int]$Status
-[string]$Code
-GraphError([string]$message, [int]$status, [string]$code) : base($message) {
-$this.Status = $status
-$this.Code = $code
-}
-}
-function Connect-Graph {
-param(
-[Parameter(Mandatory)][string]$TenantId,
-[Parameter(Mandatory)][string]$ClientId,
-[Parameter(Mandatory)][string]$ClientSecret
-)
-$script:GraphAuth = @{ TenantId = $TenantId; ClientId = $ClientId; ClientSecret = $ClientSecret; Token = $null; Expires = [datetime]::MinValue }
-[void](Get-GraphToken -Force)
-}
-function Get-GraphToken {
-param([switch]$Force)
-$a = $script:GraphAuth
-if (-not $a) { throw 'Connect-Graph has not been called.' }
-if (-not $Force -and $a.Token -and (Get-Date).ToUniversalTime() -lt $a.Expires.AddMinutes(-5)) { return $a.Token }
-$body = @{
-client_id     = $a.ClientId
-client_secret = $a.ClientSecret
-scope         = 'https://graph.microsoft.com/.default'
-grant_type    = 'client_credentials'
-}
-$r = Invoke-RestMethod -Method Post -Uri "https://login.microsoftonline.com/$($a.TenantId)/oauth2/v2.0/token" -Body $body -ContentType 'application/x-www-form-urlencoded'
-$a.Token = $r.access_token
-$a.Expires = (Get-Date).ToUniversalTime().AddSeconds([int]$r.expires_in)
-return $a.Token
-}
-function Invoke-Graph {
-param(
-[string]$Method = 'GET',
-[Parameter(Mandatory)][string]$Path,
-$Body,
-[byte[]]$Bytes,
-[string]$ContentType,
-[hashtable]$Headers,
-[switch]$Ok404,
-[switch]$Raw,
-[int]$MaxRetries = 8
-)
-$uri = if ($Path -match '^https?://') { $Path } else { "$script:GraphRoot$Path" }
-$refreshed = $false
-$started = Get-Date
-for ($attempt = 0; $attempt -le $MaxRetries; $attempt++) {
-$h = @{ Authorization = "Bearer $(Get-GraphToken)" }
-if ($Headers) { foreach ($k in $Headers.Keys) { $h[$k] = $Headers[$k] } }
-$p = @{ Method = $Method; Uri = $uri; Headers = $h; SkipHttpErrorCheck = $true }
-if ($null -ne $Bytes) {
-$p.Body = $Bytes
-$p.ContentType = if ($ContentType) { $ContentType } else { 'application/octet-stream' }
-}
-elseif ($null -ne $Body) {
-$p.Body = if ($Body -is [string]) { $Body } else { $Body | ConvertTo-Json -Depth 30 -Compress }
-$p.ContentType = if ($ContentType) { $ContentType } else { 'application/json; charset=utf-8' }
-}
-try {
-$resp = Invoke-WebRequest @p -UseBasicParsing
-}
-catch {
-$netError = $_.Exception -is [System.Net.Http.HttpRequestException] -or $_.Exception -is [System.Threading.Tasks.TaskCanceledException] -or $_.Exception -is [System.IO.IOException] -or $_.Exception -is [System.Net.WebException]
-if (-not $netError -or $attempt -eq $MaxRetries -or ((Get-Date) - $started).TotalSeconds -gt $script:GraphRetryBudgetSeconds) {
-throw [GraphError]::new("$Method $Path : $($_.Exception.GetType().Name): $($_.Exception.Message)", 0, 'network')
-}
-Start-Sleep -Seconds ([math]::Min(60, [math]::Pow(2, $attempt)))
-continue
-}
-$status = [int]$resp.StatusCode
-$rh = $resp.Headers
-if ($status -eq 401 -and -not $refreshed) { [void](Get-GraphToken -Force); $refreshed = $true; $attempt--; continue }
-if ($status -in 429, 500, 502, 503, 504 -and $attempt -lt $MaxRetries -and ((Get-Date) - $started).TotalSeconds -lt $script:GraphRetryBudgetSeconds) {
-$wait = 0
-if ($rh -and $rh['Retry-After']) { [void][int]::TryParse("$($rh['Retry-After'] | Select-Object -First 1)", [ref]$wait) }
-if ($wait -le 0) { $wait = [math]::Min(60, [math]::Pow(2, $attempt)) }
-Start-Sleep -Seconds ($wait + (Get-Random -Minimum 0 -Maximum 2))
-continue
-}
-if ($status -eq 404 -and $Ok404) { return $null }
-if ($status -ge 400) {
-$code = ''; $msg = "$($resp.Content)"
-try { $e = ($resp.Content | ConvertFrom-Json).error; $code = $e.code; $msg = "$($e.code): $($e.message)" } catch { }
-throw [GraphError]::new("$Method $Path -> $status $msg", $status, $code)
-}
-if ($Raw) { return [pscustomobject]@{ Status = $status; Headers = $rh; Content = $resp.Content } }
-if ($status -eq 204 -or -not $resp.Content) { return @{} }
-$ctype = "$($rh['Content-Type'] | Select-Object -First 1)"
-if ($ctype -match 'json') {
-$text = if ($resp.Content -is [byte[]]) { [Text.Encoding]::UTF8.GetString($resp.Content) } else { $resp.Content }
-return ($text | ConvertFrom-Json -AsHashtable -Depth 50)
-}
-return $resp.Content
-}
-throw [GraphError]::new("$Method $Path : retries exhausted", 0, 'retries')
-}
-function Get-GraphAll {
-param([Parameter(Mandatory)][string]$Path, [hashtable]$Headers, [int]$Limit = 0)
-$out = [System.Collections.Generic.List[object]]::new()
-$page = Invoke-Graph -Path $Path -Headers $Headers
-while ($true) {
-foreach ($v in @($page.value)) { if ($null -ne $v) { $out.Add($v) } }
-$next = $page.'@odata.nextLink'
-if (-not $next -or ($Limit -gt 0 -and $out.Count -ge $Limit)) { break }
-$page = Invoke-Graph -Path $next -Headers $Headers
-}
-if ($Limit -gt 0 -and $out.Count -gt $Limit) { return $out.GetRange(0, $Limit).ToArray() }
-return $out.ToArray()
-}
-function Get-GraphBytes {
-param([Parameter(Mandatory)][string]$Path)
-$tmp = [IO.Path]::GetTempFileName()
-try {
-for ($attempt = 0; $attempt -le 5; $attempt++) {
-try {
-Invoke-WebRequest -Uri "$script:GraphRoot$Path" -Headers @{ Authorization = "Bearer $(Get-GraphToken)" } -OutFile $tmp -UseBasicParsing
-return [IO.File]::ReadAllBytes($tmp)
-}
-catch {
-if ($attempt -eq 5) { throw }
-Start-Sleep -Seconds ([math]::Pow(2, $attempt))
-}
-}
-}
-finally { Remove-Item $tmp -ErrorAction SilentlyContinue }
-}
-$script:WindowsToIana = @{
-'UTC'                           = 'UTC'
-'GMT Standard Time'             = 'Europe/London'
-'W. Europe Standard Time'       = 'Europe/Berlin'
-'Romance Standard Time'         = 'Europe/Paris'
-'Central Europe Standard Time'  = 'Europe/Budapest'
-'India Standard Time'           = 'Asia/Kolkata'
-'Singapore Standard Time'       = 'Asia/Singapore'
-'Tokyo Standard Time'           = 'Asia/Tokyo'
-'China Standard Time'           = 'Asia/Shanghai'
-'AUS Eastern Standard Time'     = 'Australia/Sydney'
-'Arabian Standard Time'         = 'Asia/Dubai'
-'Eastern Standard Time'         = 'America/New_York'
-'Central Standard Time'         = 'America/Chicago'
-'Mountain Standard Time'        = 'America/Denver'
-'Pacific Standard Time'         = 'America/Los_Angeles'
-'E. South America Standard Time' = 'America/Sao_Paulo'
-}
-function Get-EventTimeZone {
-param([Parameter(Mandatory)][string]$Name)
-foreach ($id in @($Name, $script:WindowsToIana[$Name])) {
-if (-not $id) { continue }
-try { return [TimeZoneInfo]::FindSystemTimeZoneById($id) } catch { }
-}
-throw "Unknown time zone '$Name'. Use a Windows time zone name such as 'India Standard Time'."
-}
-function New-Timeline {
-param(
-[Parameter(Mandatory)][string]$EventDate,      # yyyy-MM-dd
-[Parameter(Mandatory)][string]$TimeZoneName     # Windows name, e.g. 'India Standard Time'
-)
-$day = [datetime]::ParseExact($EventDate.Trim(), 'yyyy-MM-dd', [Globalization.CultureInfo]::InvariantCulture)
-return [pscustomobject]@{ Day = $day.Date; Tz = (Get-EventTimeZone $TimeZoneName); TzName = $TimeZoneName }
-}
-function ConvertFrom-Offset {
-param([Parameter(Mandatory)][string]$Offset)
-if ($Offset -notmatch '^\s*D\s*([+-]\s*\d+)?\s*(?:(\d{1,2}):(\d{2}))?\s*$') { throw "Not a lab-day offset: '$Offset'" }
-$days = if ($Matches[1]) { [int]($Matches[1] -replace '\s', '') } else { 0 }
-$time = if ($Matches[2]) { [timespan]::new([int]$Matches[2], [int]$Matches[3], 0) } else { $null }
-return @{ Days = $days; Time = $time }
-}
-function Get-TimelineLocal {
-param($Timeline, [string]$Offset)
-$o = ConvertFrom-Offset $Offset
-$t = if ($o.Time) { $o.Time } else { [timespan]::Zero }
-return [datetime]::SpecifyKind($Timeline.Day.AddDays($o.Days).Add($t), [DateTimeKind]::Unspecified)
-}
-function Get-TimelineUtc {
-param($Timeline, [string]$Offset)
-return [TimeZoneInfo]::ConvertTimeToUtc((Get-TimelineLocal $Timeline $Offset), $Timeline.Tz)
-}
-function Get-TimelineUtcIso {
-param($Timeline, [string]$Offset)
-return (Get-TimelineUtc $Timeline $Offset).ToString("yyyy-MM-dd'T'HH:mm:ss'.000Z'", [Globalization.CultureInfo]::InvariantCulture)
-}
-$script:MaxDownload = 15MB
-$script:MaxFiles = 60
-function New-ScoreContext {
-param([Parameter(Mandatory)][string]$LearnerUpn, [Parameter(Mandatory)]$Timeline, [Parameter(Mandatory)]$Scorecard)
-$u = Invoke-Graph -Path "/users/$([uri]::EscapeDataString($LearnerUpn))?`$select=id,userPrincipalName" -Ok404
-if (-not $u) { throw "Learner account $LearnerUpn not found." }
-return [pscustomobject]@{
-UserId = $u.id; Upn = $u.userPrincipalName; Timeline = $Timeline; Scorecard = $Scorecard
-MailCache = @{}; EventsCache = $null; DriveLoaded = $false; Drive = $null; ItemsCache = $null; TextCache = @{}
-}
-}
-function Get-ScoreMail($Ctx, [string]$Folder) {
-if (-not $Ctx.MailCache.ContainsKey($Folder)) {
-try {
-$Ctx.MailCache[$Folder] = @(Get-GraphAll -Limit 200 -Headers @{ Prefer = 'outlook.body-content-type="text"' } `
--Path "/users/$($Ctx.UserId)/mailFolders/$Folder/messages?`$select=id,subject,body,bodyPreview,receivedDateTime&`$top=100&`$orderby=receivedDateTime desc")
-}
-catch { if (-not $_.Exception.PSObject.Properties['Status']) { throw };  $Ctx.MailCache[$Folder] = @() }
-}
-return $Ctx.MailCache[$Folder]
-}
-function Get-ScoreEvents($Ctx) {
-if ($null -eq $Ctx.EventsCache) {
-$w = $Ctx.Scorecard.window; if (-not $w) { $w = @{ start = 'D-1'; end = 'D+14' } }
-$s = Get-TimelineUtcIso $Ctx.Timeline $w.start
-$e = Get-TimelineUtcIso $Ctx.Timeline $w.end
-$Ctx.EventsCache = @(Get-GraphAll -Headers @{ Prefer = 'outlook.timezone="UTC"' } `
--Path "/users/$($Ctx.UserId)/calendarView?startDateTime=$s&endDateTime=$e&`$top=200&`$select=id,subject,start,end,isCancelled")
-}
-return $Ctx.EventsCache
-}
-function Get-ScoreDrive($Ctx) {
-if (-not $Ctx.DriveLoaded) {
-try { $Ctx.Drive = Invoke-Graph -Path "/users/$($Ctx.UserId)/drive" -Ok404 }
-catch { if (-not $_.Exception.PSObject.Properties['Status']) { throw };  if ($_.Exception.Status -in 400, 403) { $Ctx.Drive = $null } else { throw } }
-$Ctx.DriveLoaded = $true
-}
-return $Ctx.Drive
-}
-function Get-ScoreItems($Ctx) {
-if ($null -eq $Ctx.ItemsCache) {
-$d = Get-ScoreDrive $Ctx
-$Ctx.ItemsCache = @()   # assigned directly: an empty array from an if-expression would become $null
-if ($d) {
-$Ctx.ItemsCache = @(Get-GraphAll -Path "/drives/$($d.id)/root/delta?`$select=id,name,file,folder,size,lastModifiedDateTime,parentReference,deleted,root" |
-Where-Object { $_ -and $_.name -and -not $_.ContainsKey('deleted') -and -not $_.ContainsKey('root') })
-}
-}
-return $Ctx.ItemsCache
-}
-function Get-ScoreText($Ctx, $Item) {
-if (-not $Ctx.TextCache.ContainsKey($Item.id)) {
-$Ctx.TextCache[$Item.id] = if ([long]$Item.size -gt $script:MaxDownload) { '' } else {
-Get-FileText -Name $Item.name -Data (Get-GraphBytes -Path "/drives/$($Ctx.Drive.id)/items/$($Item.id)/content")
-}
-}
-return $Ctx.TextCache[$Item.id]
-}
-function Get-MailText($m) { return "$($m.body.content)`n$($m.bodyPreview)" }
-function Test-ScoreCheck {
-param($Ctx, $Check)
-$p = $Check.params
-switch ($Check.type) {
-'mail_contains' {
-$phrase = $p.phrase.ToLowerInvariant()
-$folders = if ($p.folders) { $p.folders } else { @('drafts', 'sentitems', 'inbox') }
-foreach ($f in $folders) {
-foreach ($m in (Get-ScoreMail $Ctx $f)) {
-if ((Get-MailText $m).ToLowerInvariant().Contains($phrase)) { return @{ passed = $true; detail = "found in ${f}: $("$($m.subject)".Substring(0, [math]::Min(60, "$($m.subject)".Length)))" } }
-}
-}
-return @{ passed = $false; detail = 'no message contains the phrase' }
-}
-'mail_subject' {
-$pre = $p.subject_prefix.ToLowerInvariant()
-$folders = if ($p.folders) { $p.folders } else { @('inbox') }
-foreach ($f in $folders) {
-foreach ($m in (Get-ScoreMail $Ctx $f)) {
-if ("$($m.subject)".Trim().ToLowerInvariant().StartsWith($pre)) { return @{ passed = $true; detail = "${f}: $($m.subject)" } }
-}
-}
-return @{ passed = $false; detail = 'no message with that subject' }
-}
-{ $_ -in 'event_exists', 'event_absent' } {
-$want = $p.subject.Trim().ToLowerInvariant()
-$hits = @(Get-ScoreEvents $Ctx | Where-Object { "$($_.subject)".Trim().ToLowerInvariant() -eq $want -and -not $_.isCancelled })
-if ($Check.type -eq 'event_exists') {
-return @{ passed = ($hits.Count -gt 0); detail = $(if ($hits.Count) { "$($hits.Count) event(s)" } else { 'no such event' }) }
-}
-return @{ passed = ($hits.Count -eq 0); detail = $(if ($hits.Count) { "$($hits.Count) event(s) present" } else { 'no such event' }) }
-}
-'drive_item_name' {
-if (-not (Get-ScoreDrive $Ctx)) { return @{ passed = $false; detail = 'OneDrive not provisioned' } }
-$pat = $p.pattern.ToLowerInvariant()
-foreach ($i in (Get-ScoreItems $Ctx)) {
-if ($i.name.ToLowerInvariant().Contains($pat) -and (-not $p.files_only -or $i.ContainsKey('file'))) { return @{ passed = $true; detail = $i.name } }
-}
-return @{ passed = $false; detail = 'no matching OneDrive item' }
-}
-'drive_file_contains' {
-if (-not (Get-ScoreDrive $Ctx)) { return @{ passed = $false; detail = 'OneDrive not provisioned' } }
-$exts = @($p.extensions | ForEach-Object { $_.ToLowerInvariant() })
-$excl = @($p.exclude_name_patterns | Where-Object { $_ } | ForEach-Object { $_.ToLowerInvariant() })
-$cands = @(Get-ScoreItems $Ctx | Where-Object {
-$n = $_.name.ToLowerInvariant()
-$_.ContainsKey('file') -and (-not $exts -or ($exts | Where-Object { $n.EndsWith($_) })) -and -not ($excl | Where-Object { $n.Contains($_) })
-} | Sort-Object { "$($_.lastModifiedDateTime)" } -Descending | Select-Object -First $script:MaxFiles)
-foreach ($i in $cands) {
-$txt = Get-ScoreText $Ctx $i
-$hit = if ($p.case_sensitive) { $txt.Contains($p.phrase) } else { $txt.ToLowerInvariant().Contains($p.phrase.ToLowerInvariant()) }
-if ($hit) { return @{ passed = $true; detail = $i.name } }
-}
-return @{ passed = $false; detail = "no file contains '$($p.phrase)' ($($cands.Count) checked)" }
-}
-default { throw "Unknown check type '$($Check.type)'." }
-}
-}
+# The check itself (PowerShell 7, gzip + base64).
+$Check = @'
+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
+'@
+
 function Set-CheckResult([bool]$Correct, [string]$Message) {
+    if (-not (Get-Command Set-ActivityResult -ErrorAction SilentlyContinue)) {
+        # Skillable's fallback: the last value in the output decides.
+        Write-Output $Message
+        Write-Output $Correct
+        return
+    }
+    try {
+        if ($Correct) { Set-ActivityResult -Correct -Message $Message } else { Set-ActivityResult -Incorrect -Message $Message }
+    }
+    catch [System.Management.Automation.ParameterBindingException] {
+        if ($Correct) { Set-ActivityResult -Correct } else { Set-ActivityResult -Incorrect }
+        Write-Output $Message
+    }
+}
+
+$pwsh = @("$env:ProgramFiles\PowerShell\7\pwsh.exe", "$env:ProgramData\HelixKit\pwsh\pwsh.exe", $env:HELIXKIT_PWSH) |
+    Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+if (-not $pwsh) {
+    Set-CheckResult $false "Your lab isn't ready yet. Tell your proctor."
+    Write-Output 'Details: PowerShell 7 was not found in the VM. The "Prepare Helix workspace" action installs it.'
+    return
+}
+
+$gz = New-Object IO.Compression.GZipStream((New-Object IO.MemoryStream(, [Convert]::FromBase64String(($Check -replace '\s', '')))), [IO.Compression.CompressionMode]::Decompress)
+$reader = New-Object IO.StreamReader($gz)
+$body = $reader.ReadToEnd()
+$reader.Dispose()
+# In PowerShell 7 the result comes back as one "##RESULT" line.
+$shim = @'
+function Set-ActivityResult { param([switch]$Correct, [switch]$Incorrect, [string]$Message)
+    Write-Output ('##RESULT ' + $(if ($Correct) { 'Correct' } else { 'Incorrect' }) + ' ' + ($Message -replace '\r?\n', ' ')) }
+'@
+$file = Join-Path ([IO.Path]::GetTempPath()) ('HelixCheck-' + [guid]::NewGuid().ToString('N') + '.ps1')
+[IO.File]::WriteAllText($file, $shim + "`n" + $body)
+
+# Secrets go through the environment, not the command line.
+$env:HELIXKIT_TENANT_ID = $TenantId
+$env:HELIXKIT_CLIENT_ID = $ClientId
+$env:HELIXKIT_CLIENT_SECRET = $ClientSecret
+$env:HELIXKIT_LEARNER_UPN = $LearnerUpn
+$env:NO_COLOR = '1'
 try {
-if ($Correct) { Set-ActivityResult -Correct -Message $Message } else { Set-ActivityResult -Incorrect -Message $Message }
+    # Windows PowerShell 5.1 turns redirected stderr into terminating errors under 'Stop'.
+    $ErrorActionPreference = 'Continue'
+    $lines = @(& $pwsh -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $file 2>&1 |
+        ForEach-Object { "$_" -replace "$([char]27)\[[0-9;]*m", '' })
+    $ErrorActionPreference = 'Stop'
 }
-catch [System.Management.Automation.ParameterBindingException] {
-if ($Correct) { Set-ActivityResult -Correct } else { Set-ActivityResult -Incorrect }
-Write-Output $Message
+finally {
+    Remove-Item $file -ErrorAction SilentlyContinue
+    Remove-Item Env:\HELIXKIT_TENANT_ID, Env:\HELIXKIT_CLIENT_ID, Env:\HELIXKIT_CLIENT_SECRET, Env:\HELIXKIT_LEARNER_UPN, Env:\NO_COLOR -ErrorAction SilentlyContinue
 }
+
+$result = $lines | Where-Object { $_ -match '^##RESULT (Correct|Incorrect)' } | Select-Object -Last 1
+$lines | Where-Object { $_ -notmatch '^##RESULT ' -and $_.Trim() } | ForEach-Object { Write-Output $_ }
+if ($result -match '^##RESULT (Correct|Incorrect) ?(.*)$') { Set-CheckResult ($Matches[1] -eq 'Correct') $Matches[2] }
+else {
+    # PowerShell 7 failed before the check could report: let the learner simply check again.
+    Set-CheckResult $false "We couldn't check this right now. Wait 1 minute, then select Check my work again."
 }
-function Invoke-ActivityCheck {
-param(
-[Parameter(Mandatory)][string]$CheckId,
-[Parameter(Mandatory)][string]$TenantId,
-[Parameter(Mandatory)][string]$ClientId,
-[Parameter(Mandatory)][string]$ClientSecret,
-[Parameter(Mandatory)][string]$LearnerUpn,
-[string]$EventDate,
-[string]$EventTimeZone
-)
-$script:GraphRetryBudgetSeconds = 40
-if (-not $EventTimeZone -or $EventTimeZone -match '^@lab') { $EventTimeZone = 'UTC' }
-if (-not $EventDate -or $EventDate -notmatch '^\d{4}-\d{2}-\d{2}$') { $EventDate = (Get-Date).ToUniversalTime().ToString('yyyy-MM-dd') }
-$check = $script:Scorecard.checks | Where-Object { $_.id -eq $CheckId }
-if (-not $check) { throw "Check '$CheckId' is not in the embedded scorecard." }
-if ($LearnerUpn -notmatch '^[^@\s]+@[^@\s]+$') {
-Set-CheckResult $false "Your lab isn't ready yet. Tell your proctor."
-Write-Output "Details: LearnerUpn is '$LearnerUpn'."
-return
-}
-try {
-Connect-Graph -TenantId $TenantId -ClientId $ClientId -ClientSecret $ClientSecret
-$tl = New-Timeline -EventDate $EventDate -TimeZoneName $EventTimeZone
-$ctx = New-ScoreContext -LearnerUpn $LearnerUpn -Timeline $tl -Scorecard $script:Scorecard
-$r = Test-ScoreCheck $ctx $check
-}
-catch {
-Set-CheckResult $false "We couldn't check this right now. Wait 1 minute, then select Check my work again."
-Write-Output "Details: $($_.Exception.Message)"
-return
-}
-if ($r.passed) { Set-CheckResult $true "Done. $($check.passes_when)" }
-else { Set-CheckResult $false "Not yet. $($check.hint)" }
-}
-$script:Scorecard = @'
-{"checks":[{"hint":"Go to step 5.9. Create a Word file named Skill-Inventory.docx in OneDrive.","passes_when":"Found Skill-Inventory in your OneDrive.","id":"skill-inventory","points":5,"params":{"pattern":"Skill-Inventory","files_only":true},"type":"drive_item_name"}],"pass_mark":70,"window":{"start":"D-1","end":"D+14"},"max":100}
-'@ | ConvertFrom-Json -AsHashtable -Depth 50
-# ===== Run =====
-Invoke-ActivityCheck -CheckId 'skill-inventory' -TenantId $TenantId -ClientId $ClientId -ClientSecret $ClientSecret -LearnerUpn $LearnerUpn

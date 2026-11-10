@@ -17,12 +17,12 @@ The VM needs outbound HTTPS to `login.microsoftonline.com` and `graph.microsoft.
 
 | # | Action | Event | Script | Blocking | Timeout | Error action | Retries |
 |---|---|---|---|---|---|---|---|
-| existing | The lab's TAP action (for the Azure Portal account) | as today | as today | Leave it; our lab doesn't use a TAP | | | |
+| existing | "Enable TAP Prereqs + Generate TAP" (variables `TAP`, `TAP2`) | Post-Build | — | Leave as is: not used by the guide, and Studio does not allow editing them | | | |
 | new | **Prepare Helix workspace**: Execute Script in Virtual Machine, PowerShell (Start from Scratch) | **First Displayable** (VM scripts cannot use Post-Build) | `lifecycle/Prepare-Helix-Workspace.ps1` | **Yes** (unticked by default) | 45 min | End lab (Log while testing) | 0 |
 
 The script waits up to 2 minutes for the HELIXKIT DVD and up to 5 minutes for internet (at First
 Displayable the VM can be up before its network), uses PowerShell 7 (installed, or the portable copy from the media extracted to
-`C:\ProgramData\HelixKit\pwsh`), and runs Grant, Learner, Pre-flight, Hydrate and Readiness (about 6–7 minutes on a fresh tenant; longer if the admin needed a licence). Any failure stops it with
+`C:\ProgramData\HelixKit\pwsh`), and runs Grant, Credits, Learner, Pre-flight, Hydrate, Readiness and CreditsCheck (about 7–10 minutes on a fresh tenant). Any failure stops it with
 the last lines of output, and **End lab** keeps a broken tenant away from participants.
 
 **Grant** adds any Graph permissions the credential's app lacks in this launch's tenant, signed in as the
@@ -32,15 +32,23 @@ and `.Password` match the credential's property names in Studio. It needs an adm
 nothing when the credential already has every permission.
 
 Edit before each event, at the top of the script: `$EventDate` (yyyy-MM-dd; left as `YYYY-MM-DD` a
-launch uses today) and `$EventTimeZone` (Windows name, default `India Standard Time`).
+launch uses today) and `$EventTimeZone` (Windows name, default `India Standard Time`). The script also sets the lab
+desktop's time zone to `$EventTimeZone`, so meetings and the 8:00 briefing show at the learner's local time.
 
-Lab variables it sets: `PermissionStatus`, `PreflightStatus`, `HydrationStatus`, `HydratedAt`, `ReadinessStatus` (each `ok`),
-`LearnerUpn`.
+Lab variables it sets: `PermissionStatus`, `PreflightStatus`, `HydrationStatus`, `HydratedAt`, `ReadinessStatus`, `CreditsStatus`
+(each `ok`), `LearnerUpn`, `CreditsPolicyId`.
 
-**Learner:** this launch's **Office 365 admin** (`AdministrativeUsername` token; `$LearnerUpn = 'admin'` on line 18). If the
+**Credits:** switches Cowork on, replacing the manual *Activate* in admin center → Copilot → Cost management. It signs in as
+the admin, registers a helper app (*HelixKit Copilot Credits*) with admin consent for the delegated CopilotCostManagement
+permissions, and creates a spending policy for **all users** with **Cowork** on (Work IQ too when accepted), billed to
+**prepaid credits** (the tenant's Capacity Pack), 25,000 credits a month and 20,000 per user. An existing active all-users
+policy with Cowork on is reused. **CreditsCheck** waits up to 10 minutes for the policy to become *enabled*. With
+`$RequireCredits = $true` (line 17) a failure ends the lab; `$false` lets a test continue. The API is a Microsoft
+**preview** (Graph beta): re-test before each event.
+
+**Learner:** this launch's **Office 365 admin** (`AdministrativeUsername` token; `$LearnerUpn = 'admin'` on line 22). If the
 admin has no licence that includes Copilot, the Learner step assigns one: a free seat, or else the seat of the last spare
-licensed user by UPN, always keeping 6 users for the Helix meeting organisers. It sets `usageLocation` first. Cowork
-itself (enabled for the tenant, Copilot credits) must come with Skillable's tenant; no Graph API turns it on.
+licensed user by UPN, always keeping 6 users for the Helix meeting organisers. It sets `usageLocation` first.
 
 ## Pre-instancing (events)
 
@@ -68,9 +76,11 @@ read the hint, fix it, and check again.*); the scripts print their own result an
 Activities, life cycle actions and the ISO apply only to labs launched after a change. A lab that was
 running when an activity was added shows "The specified script was not found".
 
-Every script (Settings tab): target **Cloud Subscription**, language **PowerShell**, version **PS 7.x** (for
-example *PS 7.1.3 | Az 6.0.0*, never 5.1), Script enabled **on**, Show output to user **on**, Retries 0, score value
-and *Task list properties → Task Name* as below.
+Every script (Settings tab): target **Virtual Machine → Win11-Pro-Base**, language **PowerShell**, Script enabled
+**on**, Show output to user **on**, Retries 0, score value and *Task list properties → Task Name* as below. The scripts
+need no cloud subscription: each runs its check in the PowerShell 7 that the life cycle action installed in the VM.
+The lab VM must be running when the learner selects Check my work. (`optional/activities-cloud/` has the same checks
+as Cloud Subscription scripts, PS 7.x, for a profile that has a subscription.)
 
 | Activity | Script (`activities/`) | Score | Task name |
 |---|---|---|---|

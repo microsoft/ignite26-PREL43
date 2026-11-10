@@ -1,10 +1,11 @@
 # =============================================================================================
-# Prepare Helix workspace  (Cowork Lab COWORK-T1, kit v1.0.4)
+# Prepare Helix workspace  (Cowork Lab COWORK-T1, kit v1.0.6)
 # Skillable life cycle action: Execute Script in Virtual Machine, language PowerShell.
-# Runs inside the lab VM. Needs the HelixKit-1.0.4.iso removable media attached to the VM.
-# Steps: Grant (missing Graph permissions only) -> Learner (the admin, with a Copilot licence) ->
-# Pre-flight -> Hydrate -> Readiness.
-# Sets lab variables PermissionStatus, LearnerUpn, PreflightStatus, HydrationStatus,
+# Runs inside the lab VM. Needs the HelixKit-1.0.6.iso removable media attached to the VM.
+# Sets the VM time zone to the event time zone. Steps: Grant (missing Graph permissions only) -> Credits (Copilot credits policy, Cowork on) ->
+# Learner (the admin, with a Copilot licence) -> Pre-flight -> Hydrate -> Readiness ->
+# CreditsCheck (waits until the credits policy is active).
+# Sets lab variables PermissionStatus, CreditsStatus, LearnerUpn, PreflightStatus, HydrationStatus,
 # HydratedAt, ReadinessStatus. Works in Windows PowerShell 5.1; the kit itself runs in PowerShell 7
 # (installed, or the portable copy on the media).
 # =============================================================================================
@@ -13,12 +14,14 @@ $ErrorActionPreference = 'Stop'
 # ----- EDIT BEFORE EACH EVENT -----
 $EventDate     = 'YYYY-MM-DD'   # event day, yyyy-MM-dd (hydration runs from D-1 09:30 to the end of D)
 $EventTimeZone = 'India Standard Time'   # Windows time zone name
+$RequireCredits = $true   # $true: a launch without active Copilot credits fails. $false (tests): continue; activate by hand.
 # ----- Filled by Skillable at run time -----
 $TenantId      = '@lab.CloudCredential(WWLM365E7).TenantId'
 $ClientId      = '@lab.CloudCredential(WWLM365E7).ClientId'
 $ClientSecret  = '@lab.CloudCredential(WWLM365E7).ClientSecret'
 $LearnerUpn    = 'admin'   # 'admin': this launch's Office 365 admin; 'auto': a licensed user; or a UPN
-# Tenant admin of this launch: only used to grant the credential's app any missing Graph permissions.
+# Tenant admin of this launch: grants the credential's app any missing Graph permissions and creates
+# the Copilot credits policy (that API only accepts a signed-in admin).
 $TenantName    = '@lab.CloudCredential(WWLM365E7).TenantName'
 # Credential fields "Administrative Username" / "Administrative Password" in Lab Access (token = name without spaces).
 $AdminUser     = '@lab.CloudCredential(WWLM365E7).AdministrativeUsername'
@@ -58,8 +61,8 @@ if (-not $kit) {
 }
 $kitVersion = (Get-Content -Raw (Join-Path $kit 'kit.json') | ConvertFrom-Json).version
 Write-Output "HelixKit $kitVersion found at $kit"
-if ($kitVersion -ne '1.0.4') {
-    throw "The VM has HelixKit $kitVersion but this script needs 1.0.4. Upload HelixKit-1.0.4.iso and set it as the Removable Media image path (and DVD Drive), then launch a new lab."
+if ($kitVersion -ne '1.0.6') {
+    throw "The VM has HelixKit $kitVersion but this script needs 1.0.6. Upload HelixKit-1.0.6.iso and set it as the Removable Media image path (and DVD Drive), then launch a new lab."
 }
 
 # 2. PowerShell 7: installed, already extracted, or extracted now from the media.
@@ -86,13 +89,20 @@ if (-not $netOk) {
 }
 Write-Output "Network ready (waited about $($i * 10 - 10) s)."
 
+# 3b. The lab desktop's clock in the event time zone, so the Helix meetings, Cowork's "today" and the 8:00
+# briefing line up with the learner's day. Not fatal: hydration does not depend on it.
+try { Set-TimeZone -Id $EventTimeZone; Write-Output "VM time zone: $EventTimeZone" }
+catch { Write-Output "WARNING: could not set the VM time zone to '$EventTimeZone': $($_.Exception.Message)" }
+
 # 4. Run the kit steps. Secrets go through the environment, not the command line.
 $env:HELIXKIT_CLIENT_SECRET = $ClientSecret
 $env:HELIXKIT_ADMIN_USER = $AdminUser
 $env:HELIXKIT_ADMIN_PASSWORD = $AdminPassword
 $env:NO_COLOR = '1'   # plain text output from PowerShell 7 (no colour codes in Skillable's log)
+$creditsFailed = $false
 try {
-    foreach ($step in @('Grant', 'Learner', 'Preflight', 'Hydrate', 'Readiness')) {
+    foreach ($step in @('Grant', 'Credits', 'Learner', 'Preflight', 'Hydrate', 'Readiness', 'CreditsCheck')) {
+        if ($step -eq 'CreditsCheck' -and $creditsFailed) { continue }
         Write-Output "----- $step -----"
         # Windows PowerShell 5.1 turns redirected stderr into terminating errors under 'Stop'.
         $ErrorActionPreference = 'Continue'
@@ -110,9 +120,15 @@ try {
         }
         if ($code -ne 0) {
             $tail = $lines | Where-Object { $_ -notmatch '^(VERBOSE:|##LABVAR )' -and $_.Trim() -notmatch '^[\|~ ]*$' } | Select-Object -Last 8
+            if ($step -in 'Credits', 'CreditsCheck' -and -not $RequireCredits) {
+                # Test launches can go on without automatic credits; the learner activates them by hand.
+                Write-Output ("WARNING: $step failed; continuing because RequireCredits is off. Activate Copilot credits by hand in the admin center.`n" + ($tail -join "`n"))
+                Set-Status CreditsStatus 'not active - activate by hand'
+                $creditsFailed = $true
+                continue
+            }
             throw "$step failed: " + ($tail -join "`n")
         }
-        if ($step -eq 'Grant') { Remove-Item Env:\HELIXKIT_ADMIN_USER, Env:\HELIXKIT_ADMIN_PASSWORD -ErrorAction SilentlyContinue }
     }
 }
 finally { Remove-Item Env:\HELIXKIT_CLIENT_SECRET, Env:\HELIXKIT_ADMIN_USER, Env:\HELIXKIT_ADMIN_PASSWORD, Env:\NO_COLOR -ErrorAction SilentlyContinue }

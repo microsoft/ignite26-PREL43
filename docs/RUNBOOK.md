@@ -21,7 +21,8 @@ How to prepare, run and close an event with the Cowork lab. Lab profile settings
 1. Set `$EventDate` in the *Prepare Helix workspace* script to the event day (D). Check `$EventTimeZone`.
 2. Remove the *Lab preparation status* NOTE from Getting started.
 3. Schedule pre-instances: participants + 15 %, starting **no earlier than D−1 09:30** event time.
-4. Spot-check one pre-built instance with section 1.
+4. Spot-check one pre-built instance with section 1, including **Copilot credits: ok** and a Cowork task that runs.
+   The Copilot credits API is a preview: re-test it in the week before the event.
 5. **Open with Skillable before the first event:** does First Displayable run while a pre-instance is built, or
    only when the learner opens the lab? If only on open, every learner waits 10–20 minutes for hydration.
    VM scripts cannot run at Post-Build.

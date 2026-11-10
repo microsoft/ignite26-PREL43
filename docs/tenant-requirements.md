@@ -23,7 +23,10 @@ action verifies all of it before anything is written, and ends the lab with a li
 
 - The **Office 365 admin** is the learner. It needs a licence that includes Copilot (the Learner step assigns one from a
   free seat, or from a spare user) and gets a mailbox and OneDrive.
-- Copilot Cowork is **enabled for the tenant, with Copilot credits** (Skillable's tenant template; no API).
+- **Prepaid Copilot credits** (a Capacity Pack) in the tenant. The Credits step switches Cowork on by creating a spending policy
+  billed to them; it cannot add credits.
+- Microsoft's **Copilot Cost Management API preview** (Graph beta) available in the tenant, and an admin that can sign in
+  from a script (no MFA or Conditional Access block).
 - **At least 6 other licensed users with mailboxes**, plus a spare seat if the admin is unlicensed. They are renamed to the Helix meeting organisers
   (Chloe Martin, Elena Marsh, Ethan Brooks, Grace Liu, Nadia Kowalski, Tomás Rivera); their UPNs don't change.
   Admin accounts are never used as organisers.

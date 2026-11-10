@@ -15,10 +15,12 @@ asks you to paste or upload is in [skillable/](skillable):
 
 ```
 skillable/
-  HelixKit-1.0.4.iso                          upload as removable media, attach to the lab VM
-  lifecycle/Prepare-Helix-Workspace.ps1       the one hydration life cycle action (VM script)
-  activities/M1 ... M5/*.ps1                  the 12 Check my work scripts (cloud scripts)
+  HelixKit-1.0.6.iso                          upload as removable media, attach to the lab VM
+  lifecycle/Prepare-Helix-Workspace.ps1       the hydration life cycle action (VM script, First Displayable)
+  lifecycle/Enable-Admin-TAP.ps1              the admin's 48-hour sign-in pass (cloud script, Post-Build)
+  activities/M1 ... M5/*.ps1                  the 12 Check my work scripts (run in the lab VM; no subscription needed)
   Lab-Instructions.md                         full lab guide: sign-in, status line, Check my work blocks
+  optional/activities-cloud/                  the same 12 checks as cloud scripts (only if the profile has a subscription)
   optional/TapPolicy.ps1, TapIssue.ps1        only if the lab's own TAP action is ever replaced
   media/HelixKit/                             what is inside the ISO (for reference)
 ```
@@ -34,15 +36,14 @@ The package is built for the cloud credential **WWLM365E7**. Learners sign in wi
 | [docs/lab-profile.md](docs/lab-profile.md) | Every Skillable setting in one place |
 | [docs/tenant-requirements.md](docs/tenant-requirements.md) | What each participant tenant must have (checked by pre-flight) |
 | [docs/implementation-plan.html](docs/implementation-plan.html) | The plan, for sharing |
+| [CHANGELOG.md](CHANGELOG.md) | What changed in each version |
 
 ## For developers
 
-The ISO and portable PowerShell ZIP files are stored in Git LFS. Install Git LFS before cloning,
-or run `git lfs pull` in an existing checkout to download them.
-
 ```
 src/common/        Graph client, timeline, text/Office/PDF handling, data pack loader
-src/lifecycle/     Grant, Learner, Preflight, Hydrate, Readiness, Launcher (the VM life cycle action); Tap (optional scripts only)
+src/lifecycle/     Grant, Credits, Learner, Preflight, Hydrate, Readiness, Launcher (the VM life cycle action),
+                   AdminTap (the admin's TAP action); Tap (optional scripts only)
 src/scoring/       Checks (scorecard check types), Activity (one check per script)
 content/           Lab-Instructions.md (source of the lab guide)
 config/            scorecard.json, readiness.json
@@ -58,7 +59,7 @@ Build (PowerShell 7; `-Iso` needs macOS `hdiutil` or Windows `oscdimg`):
 ./tools/Get-PortablePwsh.ps1                       # once: portable PowerShell 7 for the ISO (vendor/)
 ./build/Build.ps1 -CloudCredential WWLM365E7 -Iso
 Install-Module Pester -MinimumVersion 5.5 -Scope CurrentUser   # once
-Invoke-Pester ./tests                              # 76 passed
+Invoke-Pester ./tests                              # 87 passed
 ```
 
 Optional build parameters: `-EventDate yyyy-MM-dd` (otherwise set it in the life cycle script; without one a
